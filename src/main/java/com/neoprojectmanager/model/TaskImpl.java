@@ -45,7 +45,7 @@ public class TaskImpl extends NodeWrapper implements Task {
 				(TaskImpl) other);
 	}
 
-	public Iterator<Task> getDependentTaskImpls() {
+	public Iterator<Task> getDependentTasks() {
 		return new Iterator<Task>() {
 			private final Iterator<Node> iterator = traverse(
 					Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,

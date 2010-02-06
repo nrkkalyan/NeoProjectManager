@@ -102,11 +102,11 @@ public class Factory {
 		Transaction tx = gdbs.beginTx();
 		try {
 			Project project1 = createProject("Project 1");
-			TaskImpl taskImpl1 = project1.createTask("TaskImpl 1");
-			Task taskImpl2 = project1.createTask("TaskImpl 2");
-			taskImpl1.setDurationInMinutes(60 * 24 * 10);
-			taskImpl2.setDurationInMinutes(60 * 24 * 6);
-			taskImpl2.addDependentOn(taskImpl1);
+			Task task1 = project1.createTask("TaskImpl 1");
+			Task task2 = project1.createTask("TaskImpl 2");
+			task1.setDurationInMinutes(60 * 24 * 10);
+			task2.setDurationInMinutes(60 * 24 * 6);
+			task2.addDependentOn(task1);
 			tx.success();
 		} finally {
 			tx.finish();

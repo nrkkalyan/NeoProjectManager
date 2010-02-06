@@ -50,7 +50,7 @@ public class TaskTest extends ProjectTest {
 		assertTrue(node_1.hasDependents()); // again there should be
 		// dependent tasks
 
-		Iterator<Task> it = node_1.getDependentTaskImpls(); // now let's
+		Iterator<Task> it = node_1.getDependentTasks(); // now let's
 		// check
 		// what
 		// tasks are

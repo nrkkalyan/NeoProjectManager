@@ -34,16 +34,16 @@ public class Project extends NodeWrapper {
 		setName(name);
 	}
 
-	Project(Node node, GraphDatabaseService gdbs) {
+	protected Project(Node node, GraphDatabaseService gdbs) {
 		super(node, gdbs);
 		if (!this.getClass().getName().equals(node.getProperty(com.neoprojectmanager.model.NodeWrapper.PROPERTY._CLASS.name(), null)))
 			throw new IllegalArgumentException("THE GIVEN NODE IS NOT RECOGNISED AS A PROJECT NODE");
 	}
 
-	public TaskImpl createTask(String name) {
+	public Task createTask(String name) {
 		Transaction tx = this.gdbs.beginTx();
 		try {
-			TaskImpl n = new TaskImpl(this.gdbs.createNode(), this.gdbs);
+			Task n = new TaskImpl(this.gdbs.createNode(), this.gdbs);
 			n.setName(name);
 			tx.success();
 			return n;

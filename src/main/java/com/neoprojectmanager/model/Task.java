@@ -9,7 +9,7 @@ public interface Task {
 
 	public abstract TaskRelationship addDependent(Task other);
 
-	public abstract Iterator<Task> getDependentTaskImpls();
+	public abstract Iterator<Task> getDependentTasks();
 
 	public abstract boolean hasDependents();
 

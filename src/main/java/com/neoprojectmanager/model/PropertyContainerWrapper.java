@@ -89,12 +89,12 @@ abstract class PropertyContainerWrapper {
 		return gdbs.beginTx();
 	}
 
-	protected void setCreationTime() {
+	public void setCreationTime() {
 		setProperty(PROPERTY.CREATED_ON, Calendar.getInstance()
 				.getTimeInMillis());
 	}
 
-	private Date getCreationTime() {
+	public Date getCreationTime() {
 		return new Date((Long) getProperty(PROPERTY.CREATED_ON));
 	}
 
