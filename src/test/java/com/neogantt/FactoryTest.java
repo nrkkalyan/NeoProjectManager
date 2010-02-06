@@ -18,6 +18,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphdb.Transaction;
 
+import com.neoprojectmanager.model.Project;
 import com.neoprojectmanager.model.Task;
 import com.neoprojectmanager.model.TaskImpl;
 import com.neoprojectmanager.model.Factory;
@@ -53,28 +54,28 @@ public class FactoryTest {
 	}
 
 	@Test
-	public void testAddAndGetNode() {
-		Task n = factory.createTaskImpl("Node1");
-		assertNotNull(n); // A node was returned.
-		assertNotNull(factory.getTaskImplById(n.getId())); // It is actually in the
+	public void testCreateFirstLevelDomainObjects() {
+		Project p = factory.createProject("Node1");
+		assertNotNull(p); // A node was returned.
+		assertNotNull(factory.getProjectById(p.getId())); // It is actually in the
 		// database
-		assertEquals("Node1", n.getName()); // contains the mandatory property
+		assertEquals("Node1", p.getName()); // contains the mandatory property
 		// set before.
 	}
 
 	@Test
-	public void testGetInexistentNode() {
-		Task t = factory.getTaskImplById(0L);
-		assertNotNull(t); // This should be the "root" node
+	public void testGetInexistentProject() {
+		Project p = factory.getProjectById(0L);
+		assertNotNull(p); // This should be the "root" node
 		try {
-			t = factory.getTaskImplById(-1L);
+			p = factory.getProjectById(-1L);
 			assertTrue(false); // Should have thrown an exception
 		} catch (IllegalArgumentException e) {
 			assertTrue(true);
 		}
 
 		try {
-			t = factory.getTaskImplById(1000L);
+			p = factory.getProjectById(1000L);
 			assertTrue(false); // Should have thrown an exception
 		} catch (org.neo4j.graphdb.NotFoundException e) {
 			assertTrue(true);
@@ -89,14 +90,14 @@ public class FactoryTest {
 		tx.finish();
 
 		tx = factory.beginTx();
-		Iterator<Task> it = factory.getAllNodes();
+		Iterator<Task> it = factory.getAllTasks();
 		assertFalse(it.hasNext());
 		factory.populateDB();
 		tx.success();
 		tx.finish();
 
 		tx = factory.beginTx();
-		it = factory.getAllNodes();
+		it = factory.getAllTasks();
 		assertTrue(it.hasNext());
 		factory.clearDB();
 		tx.success();

@@ -59,7 +59,7 @@ public class PopulateDB extends HttpServlet {
 	}
 
 	private PrintWriter printJSON(PrintWriter out, Factory tf) {
-		Iterator<Task> it = tf.getAllNodes();
+		Iterator<Task> it = tf.getAllTasks();
 		return out.append(taskImplArrayToJSON(it).toString(3));
 	}
 

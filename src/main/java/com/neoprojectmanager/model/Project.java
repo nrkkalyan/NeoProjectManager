@@ -41,7 +41,7 @@ public class Project extends NodeWrapper {
 		super(node, gdbs);
 	}
 
-	public TaskImpl createTaskImpl(String name) {
+	public TaskImpl createTask(String name) {
 		Transaction tx = this.gdbs.beginTx();
 		try {
 			TaskImpl n = new TaskImpl(this.gdbs.createNode(), this.gdbs);
