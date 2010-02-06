@@ -17,8 +17,6 @@ import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.Traverser.Order;
 
-import com.neoprojectmanager.model.Project.RELATIONSHIP;
-
 public class TaskImpl extends NodeWrapper implements Task {
 	enum PROPERTY {
 		NAME, CREATED_ON, START_DATE, DURATION_IN_MINUTES, COST

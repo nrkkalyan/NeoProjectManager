@@ -1,24 +1,6 @@
 package com.neoprojectmanager.controller;
 
-import static com.neoprojectmanager.utils.Formatting.taskImplToJSONString;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-import static org.apache.commons.validator.GenericValidator.isLong;
-
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.neo4j.graphdb.NotFoundException;
-
-import com.neoprojectmanager.model.Task;
-import com.neoprojectmanager.model.Factory;
 
 @SuppressWarnings("serial")
 public class TaskCtrl extends HttpServlet {

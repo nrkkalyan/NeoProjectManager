@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -18,10 +17,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphdb.Transaction;
 
-import com.neoprojectmanager.model.Project;
-import com.neoprojectmanager.model.Task;
-import com.neoprojectmanager.model.TaskImpl;
 import com.neoprojectmanager.model.Factory;
+import com.neoprojectmanager.model.Project;
 
 public class FactoryTest {
 
@@ -64,7 +61,7 @@ public class FactoryTest {
 	}
 
 	@Test
-	public void testGetInexistentProject() {
+	public void testGetInexistentFirstLevelDomainObjects() {
 		Project p = factory.getProjectById(0L);
 		assertNotNull(p); // This should be the "root" node
 		try {
@@ -90,14 +87,14 @@ public class FactoryTest {
 		tx.finish();
 
 		tx = factory.beginTx();
-		Iterator<Task> it = factory.getAllTasks();
+		Iterator<Project> it = factory.getAllProjects();
 		assertFalse(it.hasNext());
 		factory.populateDB();
 		tx.success();
 		tx.finish();
 
 		tx = factory.beginTx();
-		it = factory.getAllTasks();
+		 it = factory.getAllProjects();
 		assertTrue(it.hasNext());
 		factory.clearDB();
 		tx.success();

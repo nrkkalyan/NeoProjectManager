@@ -1,6 +1,6 @@
 package com.neogantt;
 
-import static com.neoprojectmanager.utils.Formatting.taskImplToJSONString;
+import static com.neoprojectmanager.utils.Formatting.domainToJSONString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -16,7 +16,6 @@ import org.junit.Test;
 
 import com.neoprojectmanager.model.Project;
 import com.neoprojectmanager.model.Task;
-import com.neoprojectmanager.model.TaskImpl;
 
 public class TaskTest extends ProjectTest {
 
@@ -174,6 +173,6 @@ public class TaskTest extends ProjectTest {
 	public void testToJSON() {
 		assertFalse(true);
 		System.out.println("\nTASK TO JSON");
-		System.out.println(taskImplToJSONString(emptyProject.createTask("An empty task")) + "\n\n");
+		System.out.println(domainToJSONString(emptyProject.createTask("An empty task")) + "\n\n");
 	}
 }

@@ -1,6 +1,6 @@
 package com.neoprojectmanager.model;
 
-import static org.apache.commons.lang.StringUtils.*;
+import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.util.Iterator;
 
@@ -12,10 +12,7 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ReturnableEvaluator;
 import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.Traverser;
 import org.neo4j.graphdb.Traverser.Order;
-
-import com.neoprojectmanager.model.TaskImpl.RELATIONSHIP;
 
 public class Project extends NodeWrapper {
 	enum PROPERTY {
@@ -39,6 +36,8 @@ public class Project extends NodeWrapper {
 
 	Project(Node node, GraphDatabaseService gdbs) {
 		super(node, gdbs);
+		if (!this.getClass().getName().equals(node.getProperty(com.neoprojectmanager.model.NodeWrapper.PROPERTY._CLASS.name(), null)))
+			throw new IllegalArgumentException("THE GIVEN NODE IS NOT RECOGNISED AS A PROJECT NODE");
 	}
 
 	public TaskImpl createTask(String name) {
@@ -103,12 +102,17 @@ public class Project extends NodeWrapper {
 		return createRelationShip(this, RELATIONSHIP.HOLD_RESOURCE, resource);
 	}
 
+	/**
+	 * Return the subProjects of this project.
+	 * @return
+	 */
 	public Iterator<Project> getSubProjects() {
 		return new Iterator<Project>() {
 			private final Iterator<Node> iterator = traverse(
 					Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
 					ReturnableEvaluator.ALL_BUT_START_NODE,
-					RELATIONSHIP.INCLUDE_PROJECT, Direction.OUTGOING).iterator();
+					RELATIONSHIP.INCLUDE_PROJECT, Direction.OUTGOING)
+					.iterator();
 
 			public boolean hasNext() {
 				return iterator.hasNext();
@@ -124,5 +128,51 @@ public class Project extends NodeWrapper {
 				iterator.remove();
 			}
 		};
+	}
+	
+	public boolean hasSubProjects() {
+		return hasRelationship(RELATIONSHIP.INCLUDE_PROJECT, Direction.OUTGOING);
+	}
+	
+	public boolean hasTasks() {
+		return hasRelationship(RELATIONSHIP.INCLUDE_TASK, Direction.OUTGOING);
+	}
+	
+	public boolean hasResources() {
+		return hasRelationship(RELATIONSHIP.HOLD_RESOURCE, Direction.OUTGOING);
+	}
+
+	/**
+	 * Returns the tasks associated with this project.
+	 * @return
+	 */
+	public Iterator<Task> getAllTasks() {
+		return new Iterator<Task>() {
+			private final Iterator<Node> iterator = traverse(
+					Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
+					ReturnableEvaluator.ALL_BUT_START_NODE,
+					RELATIONSHIP.INCLUDE_TASK, Direction.OUTGOING).iterator();
+
+			public boolean hasNext() {
+				return iterator.hasNext();
+			}
+
+			public Task next() {
+				Node nextNode = iterator.next();
+				return new TaskImpl(nextNode, gdbs);
+			}
+
+			public void remove() {
+			}
+		};
+	}
+	
+	/**
+	 * REturn not only the dasks attached to this project but the tasks attached to the subprojects too.
+	 * @return
+	 */
+	public Iterator<Task> getAllTasksAndSubtasks() {
+		// TODO
+		return null;
 	}
 }

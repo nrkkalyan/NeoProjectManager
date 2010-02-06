@@ -1,6 +1,6 @@
 package com.neoprojectmanager.controller;
 
-import static com.neoprojectmanager.utils.Formatting.taskImplArrayToJSON;
+import static com.neoprojectmanager.utils.Formatting.domainToJSON;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.neoprojectmanager.model.Factory;
-import com.neoprojectmanager.model.Task;
+import com.neoprojectmanager.model.Project;
 
 @SuppressWarnings("serial")
 public class PopulateDB extends HttpServlet {
@@ -59,8 +59,8 @@ public class PopulateDB extends HttpServlet {
 	}
 
 	private PrintWriter printJSON(PrintWriter out, Factory tf) {
-		Iterator<Task> it = tf.getAllTasks();
-		return out.append(taskImplArrayToJSON(it).toString(3));
+		Iterator<Project> it = tf.getAllProjects();
+		return out.append(domainToJSON(it).toString(3));
 	}
 
 	public void init() throws ServletException {

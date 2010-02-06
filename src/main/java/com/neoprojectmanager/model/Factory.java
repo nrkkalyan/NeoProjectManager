@@ -27,25 +27,6 @@ public class Factory {
 		if (gdbs == null)
 			this.gdbs = new EmbeddedGraphDatabase(this.dbFolder);
 	}
-
-	public Iterator<Task> getAllTasks() {
-		return new Iterator<Task>() {
-			private final Iterator<Node> iterator = gdbs.getAllNodes()
-					.iterator();
-
-			public boolean hasNext() {
-				return iterator.hasNext();
-			}
-
-			public Task next() {
-				Node nextNode = iterator.next();
-				return new TaskImpl(nextNode, gdbs);
-			}
-
-			public void remove() {
-			}
-		};
-	}
 	
 	public Iterator<Project> getAllProjects() {
 		return new Iterator<Project>() {

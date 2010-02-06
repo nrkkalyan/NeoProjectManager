@@ -1,12 +1,10 @@
 package com.neoprojectmanager.utils;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 
 import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import net.sf.json.JsonConfig;
 
 import com.neoprojectmanager.model.Task;
@@ -52,21 +50,16 @@ public class Formatting {
 			return b ? "1" : "0";
 	}
 	
-	public static String taskImplToJSONString(Task taskImpl) {
-		return taskImplToJSON(taskImpl).toString();
+	public static String domainToJSONString(Task taskImpl) {
+		return domainToJSON(taskImpl).toString();
 	}
 	
 	public static String taskImplArrayToJSONString(Iterator<Task> task) {
-		return taskImplArrayToJSON(task).toString();
-	}
-
-	public static JSONObject taskImplToJSON(Task taskImpl) {
-		JSONObject jsonObject = JSONObject.fromObject(taskImpl, taskNodeJsonConfig);
-		return jsonObject;
+		return domainToJSON(task).toString();
 	}
 	
-	public static JSONArray taskImplArrayToJSON(Iterator<Task> task) {
-		JSONArray jsonObject = JSONArray.fromObject(task, taskNodeJsonConfig);
+	public static JSONArray domainToJSON(Object domain) {
+		JSONArray jsonObject = JSONArray.fromObject(domain, taskNodeJsonConfig);
 		return jsonObject;
 	}
 	

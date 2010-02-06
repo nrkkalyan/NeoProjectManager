@@ -2,7 +2,6 @@ package com.neoprojectmanager.model;
 
 import org.apache.commons.lang.StringUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
 
 public class Resource extends NodeWrapper {
 	enum PROPERTY {
