@@ -47,12 +47,9 @@ public class Factory {
 	}
 
 	public Task createTask(String name) {
-		if (isBlank(name))
-			throw new IllegalArgumentException("Name can not be blank");
 		Transaction tx = this.gdbs.beginTx();
 		try {
-			Task n = new Task(this.gdbs.createNode(), this.gdbs);
-			n.setName(name);
+			Task n = new Task(name, this.gdbs);
 			tx.success();
 			return n;
 		} finally {
@@ -73,7 +70,7 @@ public class Factory {
 		}
 	}
 
-	public Task getNodeById(long id) {
+	public Task getTaskById(long id) {
 		Transaction tx = this.gdbs.beginTx();
 		try {
 			return new Task(this.gdbs.getNodeById(id), this.gdbs);

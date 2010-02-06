@@ -26,14 +26,13 @@ public class Task extends NodeWrapper {
 		DEPEND_ON, INCLUDE, HOLD
 	}
 	
-	private Node node;
-	
 	Task(Node node, GraphDatabaseService gdbs) {
 		super(node, gdbs);
 	}
 	
 	Task(String name, GraphDatabaseService gdbs) {
 		super(gdbs);
+		setName(name);
 	}
 
 

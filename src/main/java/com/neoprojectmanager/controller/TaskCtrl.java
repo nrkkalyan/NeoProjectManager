@@ -60,7 +60,7 @@ public class TaskCtrl extends HttpServlet {
 		Factory factory = getFactory();
 		if (nodeId != null) {
 			try {
-				task = factory.getNodeById(nodeId);
+				task = factory.getTaskById(nodeId);
 			} catch (NotFoundException e) {
 				response.sendError(410, "Node with id " + nodeId
 						+ "does not exist.");
@@ -81,7 +81,7 @@ public class TaskCtrl extends HttpServlet {
 		Factory tf = getFactory();
 		Task updateTask;
 		if (isLong(request.getParameter(ID)))
-			updateTask = tf.getNodeById(Long
+			updateTask = tf.getTaskById(Long
 					.parseLong(request.getParameter(ID)));
 		else
 			throw new ServletException("The passed id is not valid.");

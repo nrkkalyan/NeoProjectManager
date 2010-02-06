@@ -13,7 +13,7 @@ public class ProjectTest extends FactoryTest {
 	public void testCreateTask() {
 		Task task = factory.createTask("Task");
 		assertNotNull(task);
-		assertNotNull(factory.getNodeById(task.getId()));
+		assertNotNull(factory.getTaskById(task.getId()));
 		assertEquals("Task", task.getName());
 	}
 
