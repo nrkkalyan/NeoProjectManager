@@ -33,7 +33,7 @@ public interface Task {
 
 	public abstract long getId();
 
-	public abstract Task getProject();
+	public abstract Project getProject();
 
 	public abstract Date getEndDate();
 

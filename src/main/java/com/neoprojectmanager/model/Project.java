@@ -20,7 +20,13 @@ public class Project extends NodeWrapper {
 	}
 
 	enum RELATIONSHIP implements RelationshipType {
-		INCLUDE_PROJECT, INCLUDE_TASK, HOLD_RESOURCE
+		HOLD_RESOURCE, INCLUDE_PROJECT, INCLUDE_TASK
+	}
+
+	protected Project(Node node, GraphDatabaseService gdbs) {
+		super(node, gdbs);
+		if (!this.getClass().getName().equals(node.getProperty(com.neoprojectmanager.model.NodeWrapper.PROPERTY._CLASS.name(), null)))
+			throw new IllegalArgumentException("THE GIVEN NODE IS NOT RECOGNISED AS A PROJECT NODE");
 	}
 
 	/**
@@ -30,60 +36,12 @@ public class Project extends NodeWrapper {
 	 * @param gdbs
 	 */
 	public Project(String name, GraphDatabaseService gdbs) {
-		super(gdbs.createNode(), gdbs);
+		super(gdbs);
 		setName(name);
 	}
 
-	protected Project(Node node, GraphDatabaseService gdbs) {
-		super(node, gdbs);
-		if (!this.getClass().getName().equals(node.getProperty(com.neoprojectmanager.model.NodeWrapper.PROPERTY._CLASS.name(), null)))
-			throw new IllegalArgumentException("THE GIVEN NODE IS NOT RECOGNISED AS A PROJECT NODE");
-	}
-
-	public Task createTask(String name) {
-		Transaction tx = this.gdbs.beginTx();
-		try {
-			Task n = new TaskImpl(this.gdbs.createNode(), this.gdbs);
-			n.setName(name);
-			tx.success();
-			return n;
-		} finally {
-			tx.finish();
-		}
-	}
-
-	/**
-	 * The scenario of this method is that a task is included by one and only
-	 * one project. So I take the incoming relationship with a project. If such
-	 * a relationship is present and the including project is the current one,
-	 * then I delete the relationship with the project and the task itself.
-	 * 
-	 * @param id
-	 */
-	public void removeTaskById(final long id) {
-		Transaction tx = gdbs.beginTx();
-		try {
-			Node task = gdbs.getNodeById(id);
-			Relationship r = task.getSingleRelationship(
-					RELATIONSHIP.INCLUDE_TASK, Direction.INCOMING);
-			if (r != null && r.getStartNode().getId() == this.getId()) {
-				r.delete();
-				task.delete();
-			}
-			tx.success();
-		} finally {
-			tx.finish();
-		}
-	}
-
-	public void setName(String value) {
-		if (isBlank(value))
-			throw new IllegalArgumentException();
-		setProperty(PROPERTY.NAME, value);
-	}
-
-	public String getName() {
-		return (String) getPropertyOrNull(PROPERTY.NAME);
+	public ProjectRelationship allocateResource(Resource resource) {
+		return new ProjectRelationship(createRelationShip(this, RELATIONSHIP.HOLD_RESOURCE, resource), gdbs);
 	}
 
 	public Project createSubProject(String name) {
@@ -98,8 +56,19 @@ public class Project extends NodeWrapper {
 		}
 	}
 
-	public TaskRelationship allocateResource(Resource resource) {
-		return createRelationShip(this, RELATIONSHIP.HOLD_RESOURCE, resource);
+	public Task createTask(String name) {
+		Transaction tx = this.gdbs.beginTx();
+		try {
+			Task n = new TaskImpl(name, this.gdbs);
+			tx.success();
+			return n;
+		} finally {
+			tx.finish();
+		}
+	}
+
+	public String getName() {
+		return (String) getPropertyOrNull(PROPERTY.NAME);
 	}
 
 	/**
@@ -129,24 +98,12 @@ public class Project extends NodeWrapper {
 			}
 		};
 	}
-	
-	public boolean hasSubProjects() {
-		return hasRelationship(RELATIONSHIP.INCLUDE_PROJECT, Direction.OUTGOING);
-	}
-	
-	public boolean hasTasks() {
-		return hasRelationship(RELATIONSHIP.INCLUDE_TASK, Direction.OUTGOING);
-	}
-	
-	public boolean hasResources() {
-		return hasRelationship(RELATIONSHIP.HOLD_RESOURCE, Direction.OUTGOING);
-	}
 
 	/**
 	 * Returns the tasks associated with this project.
 	 * @return
 	 */
-	public Iterator<Task> getAllTasks() {
+	public Iterator<Task> getTasks() {
 		return new Iterator<Task>() {
 			private final Iterator<Node> iterator = traverse(
 					Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
@@ -166,13 +123,55 @@ public class Project extends NodeWrapper {
 			}
 		};
 	}
-	
+
 	/**
 	 * REturn not only the dasks attached to this project but the tasks attached to the subprojects too.
 	 * @return
 	 */
-	public Iterator<Task> getAllTasksAndSubtasks() {
+	public Iterator<Task> getTasksAndSubtasks() {
 		// TODO
 		return null;
+	}
+	
+	public boolean hasResources() {
+		return hasRelationship(RELATIONSHIP.HOLD_RESOURCE, Direction.OUTGOING);
+	}
+	
+	public boolean hasSubProjects() {
+		return hasRelationship(RELATIONSHIP.INCLUDE_PROJECT, Direction.OUTGOING);
+	}
+	
+	public boolean hasTasks() {
+		return hasRelationship(RELATIONSHIP.INCLUDE_TASK, Direction.OUTGOING);
+	}
+
+	/**
+	 * The scenario of this method is that a task is included by one and only
+	 * one project. So I take the incoming relationship with a project. If such
+	 * a relationship is present and the including project is the current one,
+	 * then I delete the relationship with the project and the task itself.
+	 * 
+	 * @param id
+	 */
+	public void removeTaskById(final long id) {
+		Transaction tx = gdbs.beginTx();
+		try {
+			Node task = gdbs.getNodeById(id);
+			Relationship r = task.getSingleRelationship(
+					RELATIONSHIP.INCLUDE_TASK, Direction.INCOMING);
+			if (r != null && r.getStartNode().getId() == this.getId()) {
+				r.delete();
+				task.delete();
+			}
+			tx.success();
+		} finally {
+			tx.finish();
+		}
+	}
+	
+	public void setName(String value) {
+		if (isBlank(value))
+			throw new IllegalArgumentException();
+		setProperty(PROPERTY.NAME, value);
 	}
 }

@@ -36,13 +36,13 @@ public class TaskImpl extends NodeWrapper implements Task {
 	}
 
 	public TaskRelationship addDependentOn(Task other) {
-		return createRelationShip((TaskImpl) other, RELATIONSHIP.DEPEND_ON,
-				this);
+		return new TaskRelationship(createRelationShip((TaskImpl) other, RELATIONSHIP.DEPEND_ON,
+				this), gdbs);
 	}
 
 	public TaskRelationship addDependent(Task other) {
-		return createRelationShip(this, RELATIONSHIP.DEPEND_ON,
-				(TaskImpl) other);
+		return new TaskRelationship(createRelationShip(this, RELATIONSHIP.DEPEND_ON,
+				(TaskImpl) other), gdbs);
 	}
 
 	public Iterator<Task> getDependentTasks() {
@@ -119,7 +119,7 @@ public class TaskImpl extends NodeWrapper implements Task {
 		return (Integer) getPropertyOrNull(PROPERTY.DURATION_IN_MINUTES);
 	}
 
-	public Task getProject() {
+	public Project getProject() {
 		Transaction tx = this.gdbs.beginTx();
 		try {
 			Relationship r = getSingleRelationship(
@@ -128,7 +128,7 @@ public class TaskImpl extends NodeWrapper implements Task {
 				return null;
 			Node n = r.getStartNode();
 			tx.success();
-			return new TaskImpl(n, this.gdbs);
+			return new Project(n, this.gdbs);
 		} finally {
 			tx.finish();
 		}

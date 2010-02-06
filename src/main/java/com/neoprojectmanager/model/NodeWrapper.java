@@ -13,15 +13,11 @@ import org.neo4j.graphdb.Traverser.Order;
 
 class NodeWrapper extends PropertyContainerWrapper {
 
-	public enum PROPERTY {
-		_CLASS
-	}
 	Node node;
 
 	NodeWrapper(GraphDatabaseService gdbs) {
-		super(gdbs.createNode(), gdbs);
+		super(gdbs);
 		this.node = (Node) super.propertyContainer;
-		setProperty(PROPERTY._CLASS, this.getClass().getName());
 	}
 
 	NodeWrapper(Node node, GraphDatabaseService gdbs) {
@@ -29,12 +25,12 @@ class NodeWrapper extends PropertyContainerWrapper {
 		this.node = node;
 	}
 
-	TaskRelationship createRelationShip(NodeWrapper from,
-			RelationshipType type, NodeWrapper to) {
+	Relationship createRelationShip(NodeWrapper from, RelationshipType type,
+			NodeWrapper destination) {
 		Transaction tx = gdbs.beginTx();
 		try {
-			TaskRelationship tr = new TaskRelationship(from.getNode()
-					.createRelationshipTo(to.getNode(), type), gdbs);
+			Relationship tr = from.getNode().createRelationshipTo(destination.getNode(),
+					type);
 			tx.success();
 			return tr;
 		} finally {
@@ -43,8 +39,7 @@ class NodeWrapper extends PropertyContainerWrapper {
 	}
 
 	public Node getNode() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.node;
 	}
 
 	public long getId() {

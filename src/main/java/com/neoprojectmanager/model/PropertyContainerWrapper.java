@@ -8,15 +8,17 @@ import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Transaction;
 
 /**
- * Implements utility methods to manage properties common to nodes and relationships wrappers.
+ * Implements utility methods to manage properties common to nodes and
+ * relationships wrappers.
+ * 
  * @author xan
- *
+ * 
  */
 abstract class PropertyContainerWrapper {
 
 	protected enum PROPERTY {
-			CREATED_ON
-		}
+		CREATED_ON, UPDATED_ON, _CLASS
+	}
 
 	/**
 	 * Used to open/close the transactions.
@@ -24,9 +26,25 @@ abstract class PropertyContainerWrapper {
 	protected GraphDatabaseService gdbs;
 	protected PropertyContainer propertyContainer;
 
-	PropertyContainerWrapper(PropertyContainer propertyContainer, GraphDatabaseService gdbs) {
+	PropertyContainerWrapper(PropertyContainer propertyContainer,
+			GraphDatabaseService gdbs) {
+		if (!this.getClass().getCanonicalName().equals(
+				getProperty(PROPERTY._CLASS))) {
+			System.err
+					.println("You are trying to wrap a node that belongs to type: "
+							+ getProperty(PROPERTY._CLASS));
+			return;
+		}
 		this.gdbs = gdbs;
 		this.propertyContainer = propertyContainer;
+		setProperty(PROPERTY._CLASS, this.getClass().getName());
+	}
+
+	PropertyContainerWrapper(GraphDatabaseService gdbs) {
+		this.gdbs = gdbs;
+		this.propertyContainer = gdbs.createNode();
+		setCreationTime();
+		setProperty(PROPERTY._CLASS, this.getClass().getName());
 	}
 
 	protected void setProperty(Enum property, Object value)
@@ -50,7 +68,7 @@ abstract class PropertyContainerWrapper {
 			tx.finish();
 		}
 	}
-	
+
 	protected Object getProperty(Enum property) {
 		Transaction tx = beginTx();
 		try {
