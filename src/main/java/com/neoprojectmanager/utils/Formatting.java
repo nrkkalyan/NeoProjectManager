@@ -10,6 +10,7 @@ import net.sf.json.JSONObject;
 import net.sf.json.JsonConfig;
 
 import com.neoprojectmanager.model.Task;
+import com.neoprojectmanager.model.TaskImpl;
 
 public class Formatting {
 
@@ -19,7 +20,7 @@ public class Formatting {
 				new DateJsonValueProcessor());
 	}
 	
-	public static String toCSV(Iterator<Task> it) {
+	public static String toCSV(Iterator<TaskImpl> it) {
 		StringBuilder sb = new StringBuilder("");
 		while (it.hasNext()) {
 			sb.append(it.next().getId());
@@ -51,20 +52,20 @@ public class Formatting {
 			return b ? "1" : "0";
 	}
 	
-	public static String taskToJSONString(Task task) {
-		return taskToJSON(task).toString();
+	public static String taskImplToJSONString(Task taskImpl) {
+		return taskImplToJSON(taskImpl).toString();
 	}
 	
-	public static String taskArrayToJSONString(Iterator<Task> tasks) {
-		return taskArrayToJSON(tasks).toString();
+	public static String taskImplArrayToJSONString(Iterator<Task> task) {
+		return taskImplArrayToJSON(task).toString();
 	}
 
-	public static JSONObject taskToJSON(Task task) {
-		JSONObject jsonObject = JSONObject.fromObject(task, taskNodeJsonConfig);
+	public static JSONObject taskImplToJSON(Task taskImpl) {
+		JSONObject jsonObject = JSONObject.fromObject(taskImpl, taskNodeJsonConfig);
 		return jsonObject;
 	}
 	
-	public static JSONArray taskArrayToJSON(Iterator<Task> task) {
+	public static JSONArray taskImplArrayToJSON(Iterator<Task> task) {
 		JSONArray jsonObject = JSONArray.fromObject(task, taskNodeJsonConfig);
 		return jsonObject;
 	}

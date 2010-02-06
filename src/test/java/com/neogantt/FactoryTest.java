@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.neo4j.graphdb.Transaction;
 
 import com.neoprojectmanager.model.Task;
+import com.neoprojectmanager.model.TaskImpl;
 import com.neoprojectmanager.model.Factory;
 
 public class FactoryTest {
@@ -53,27 +54,27 @@ public class FactoryTest {
 
 	@Test
 	public void testAddAndGetNode() {
-		Task n = factory.createTask("Node1");
+		Task n = factory.createTaskImpl("Node1");
 		assertNotNull(n); // A node was returned.
-		assertNotNull(factory.getTaskById(n.getId())); // It is actually in the
-														// database
+		assertNotNull(factory.getTaskImplById(n.getId())); // It is actually in the
+		// database
 		assertEquals("Node1", n.getName()); // contains the mandatory property
-											// set before.
+		// set before.
 	}
 
 	@Test
 	public void testGetInexistentNode() {
-		Task t = factory.getTaskById(0L);
+		Task t = factory.getTaskImplById(0L);
 		assertNotNull(t); // This should be the "root" node
 		try {
-			t = factory.getTaskById(-1L);
+			t = factory.getTaskImplById(-1L);
 			assertTrue(false); // Should have thrown an exception
 		} catch (IllegalArgumentException e) {
 			assertTrue(true);
 		}
 
 		try {
-			t = factory.getTaskById(1000L);
+			t = factory.getTaskImplById(1000L);
 			assertTrue(false); // Should have thrown an exception
 		} catch (org.neo4j.graphdb.NotFoundException e) {
 			assertTrue(true);
@@ -83,18 +84,23 @@ public class FactoryTest {
 	@Test
 	public void testPopulateAndClearDb() {
 		Transaction tx = factory.beginTx();
-		try {
-			factory.clearDB();
-			Iterator<Task> it = factory.getAllNodes();
-			assertFalse(it.hasNext());
-			factory.populateDB();
-			it = factory.getAllNodes();
-			assertTrue(it.hasNext());
-			factory.clearDB();
-			tx.success();
-		} finally {
-			tx.finish();
-		}
+		factory.clearDB();
+		tx.success();
+		tx.finish();
+
+		tx = factory.beginTx();
+		Iterator<Task> it = factory.getAllNodes();
+		assertFalse(it.hasNext());
+		factory.populateDB();
+		tx.success();
+		tx.finish();
+
+		tx = factory.beginTx();
+		it = factory.getAllNodes();
+		assertTrue(it.hasNext());
+		factory.clearDB();
+		tx.success();
+		tx.finish();
 	}
 
 }

@@ -1,5 +1,8 @@
 package com.neoprojectmanager.model;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Transaction;
@@ -10,6 +13,10 @@ import org.neo4j.graphdb.Transaction;
  *
  */
 abstract class PropertyContainerWrapper {
+
+	protected enum PROPERTY {
+			CREATED_ON
+		}
 
 	/**
 	 * Used to open/close the transactions.
@@ -80,6 +87,15 @@ abstract class PropertyContainerWrapper {
 
 	Transaction beginTx() {
 		return gdbs.beginTx();
+	}
+
+	protected void setCreationTime() {
+		setProperty(PROPERTY.CREATED_ON, Calendar.getInstance()
+				.getTimeInMillis());
+	}
+
+	private Date getCreationTime() {
+		return new Date((Long) getProperty(PROPERTY.CREATED_ON));
 	}
 
 }

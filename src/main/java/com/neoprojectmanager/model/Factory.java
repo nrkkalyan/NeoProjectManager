@@ -1,10 +1,9 @@
 package com.neoprojectmanager.model;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import static org.apache.commons.lang.StringUtils.isBlank;
 
-import static org.apache.commons.lang.StringUtils.*;
+import java.util.Iterator;
+
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -33,7 +32,7 @@ public class Factory {
 
 			public Task next() {
 				Node nextNode = iterator.next();
-				return new Task(nextNode, gdbs);
+				return new TaskImpl(nextNode, gdbs);
 			}
 
 			public void remove() {
@@ -46,10 +45,10 @@ public class Factory {
 		this.gdbs = null;
 	}
 
-	public Task createTask(String name) {
+	public Task createTaskImpl(String name) {
 		Transaction tx = this.gdbs.beginTx();
 		try {
-			Task n = new Task(name, this.gdbs);
+			Task n = new TaskImpl(name, this.gdbs);
 			tx.success();
 			return n;
 		} finally {
@@ -70,10 +69,23 @@ public class Factory {
 		}
 	}
 
-	public Task getTaskById(long id) {
+	public Task getTaskImplById(long id) {
 		Transaction tx = this.gdbs.beginTx();
 		try {
-			return new Task(this.gdbs.getNodeById(id), this.gdbs);
+			Task t = new TaskImpl(this.gdbs.getNodeById(id), this.gdbs);
+			tx.success();
+			return t;
+		} finally {
+			tx.finish();
+		}
+	}
+
+	public Project getProjectById(long id) {
+		Transaction tx = this.gdbs.beginTx();
+		try {
+			Project p = new Project(this.gdbs.getNodeById(id), this.gdbs);
+			tx.success();
+			return p;
 		} finally {
 			tx.finish();
 		}
@@ -82,7 +94,6 @@ public class Factory {
 	public void clearDB() {
 		Transaction tx = gdbs.beginTx();
 		try {
-
 			for (Node n : gdbs.getAllNodes()) {
 				for (Relationship r : n.getRelationships()) {
 					r.delete();
@@ -100,12 +111,18 @@ public class Factory {
 	}
 
 	public void populateDB() {
-		Project project1 = createProject("Project 1");
-		Task task1 = project1.createTask("Task 1");
-		Task task2 = project1.createTask("Task 2");
-		task1.setDurationInMinutes(60 * 24 * 10);
-		task2.setDurationInMinutes(60 * 24 * 6);
-		task2.addDependentOn(task1);
+		Transaction tx = gdbs.beginTx();
+		try {
+			Project project1 = createProject("Project 1");
+			TaskImpl taskImpl1 = project1.createTaskImpl("TaskImpl 1");
+			Task taskImpl2 = project1.createTaskImpl("TaskImpl 2");
+			taskImpl1.setDurationInMinutes(60 * 24 * 10);
+			taskImpl2.setDurationInMinutes(60 * 24 * 6);
+			taskImpl2.addDependentOn(taskImpl1);
+			tx.success();
+		} finally {
+			tx.finish();
+		}
 	}
 
 	public String getDbFolder() {

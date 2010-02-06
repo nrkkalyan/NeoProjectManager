@@ -1,7 +1,6 @@
 package com.neoprojectmanager.controller;
 
-import static com.neoprojectmanager.utils.Formatting.taskArrayToJSON;
-import static org.apache.commons.lang.StringUtils.isBlank;
+import static com.neoprojectmanager.utils.Formatting.taskImplArrayToJSON;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -61,7 +60,7 @@ public class PopulateDB extends HttpServlet {
 
 	private PrintWriter printJSON(PrintWriter out, Factory tf) {
 		Iterator<Task> it = tf.getAllNodes();
-		return out.append(taskArrayToJSON(it).toString(3));
+		return out.append(taskImplArrayToJSON(it).toString(3));
 	}
 
 	public void init() throws ServletException {

@@ -1,6 +1,6 @@
 package com.neoprojectmanager.controller;
 
-import static com.neoprojectmanager.utils.Formatting.taskToJSONString;
+import static com.neoprojectmanager.utils.Formatting.taskImplToJSONString;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 import static org.apache.commons.validator.GenericValidator.isLong;
 
@@ -56,11 +56,11 @@ public class TaskCtrl extends HttpServlet {
 			return;
 		}
 
-		Task task = null;
+		Task taskImpl = null;
 		Factory factory = getFactory();
 		if (nodeId != null) {
 			try {
-				task = factory.getTaskById(nodeId);
+				taskImpl = factory.getTaskImplById(nodeId);
 			} catch (NotFoundException e) {
 				response.sendError(410, "Node with id " + nodeId
 						+ "does not exist.");
@@ -69,7 +69,7 @@ public class TaskCtrl extends HttpServlet {
 
 			response.setContentType("application/json");
 			PrintWriter out = response.getWriter();
-			out.println(taskToJSONString(task));
+			out.println(taskImplToJSONString(taskImpl));
 			out.close();
 			return;
 
@@ -79,16 +79,16 @@ public class TaskCtrl extends HttpServlet {
 	private void update(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		Factory tf = getFactory();
-		Task updateTask;
+		Task updateTaskImpl;
 		if (isLong(request.getParameter(ID)))
-			updateTask = tf.getTaskById(Long
+			updateTaskImpl = tf.getTaskImplById(Long
 					.parseLong(request.getParameter(ID)));
 		else
 			throw new ServletException("The passed id is not valid.");
 
 		String name = request.getParameter(NAME);
 		if (!isEmpty(name))
-			updateTask.setName(name);
+			updateTaskImpl.setName(name);
 
 		String startDate = request.getParameter(START_DATE);
 		String endDate = request.getParameter(END_DATE);
@@ -98,10 +98,10 @@ public class TaskCtrl extends HttpServlet {
 						.parse(String.valueOf(startDate));
 				Date newEndDate = new SimpleDateFormat(DD_MM_YYYY).parse(String
 						.valueOf(endDate));
-				updateTask
+				updateTaskImpl
 						.setDurationInMinutes((int) (newEndDate.getTime() - newStartDate
 								.getTime()) / 1000 / 60);
-				updateTask.setStartDate(newStartDate);
+				updateTaskImpl.setStartDate(newStartDate);
 			} catch (ParseException e) {
 				response.sendError(410, "ERROR PARSING THE DATES");
 				return;
@@ -166,7 +166,7 @@ public class TaskCtrl extends HttpServlet {
 
 		// create
 		String name = req.getParameter(NAME);
-		Task insertTask = tf.createTask(name);
+		Task insertTaskImpl = tf.createTaskImpl(name);
 
 		// get and set startDate
 		String startDate = req.getParameter(START_DATE);
@@ -174,7 +174,7 @@ public class TaskCtrl extends HttpServlet {
 			try {
 				Date newStartDate = new SimpleDateFormat(MM_DD_YYYY)
 						.parse(String.valueOf(startDate));
-				insertTask.setStartDate(newStartDate);
+				insertTaskImpl.setStartDate(newStartDate);
 			} catch (ParseException e) {
 				resp.sendError(410, "ERROR PARSING THE START DATE");
 				return;
@@ -186,8 +186,8 @@ public class TaskCtrl extends HttpServlet {
 			try {
 				Date date = new SimpleDateFormat(MM_DD_YYYY).parse(String
 						.valueOf(endDate));
-				insertTask
-						.setDurationInMinutes((int) (date.getTime() - insertTask
+				insertTaskImpl
+						.setDurationInMinutes((int) (date.getTime() - insertTaskImpl
 								.getStartDate().getTime()) / 1000 / 60);
 			} catch (ParseException e) {
 				resp.sendError(410, "ERROR PARSING THE START DATE");

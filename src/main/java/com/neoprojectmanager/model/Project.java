@@ -1,12 +1,21 @@
 package com.neoprojectmanager.model;
 
 import static org.apache.commons.lang.StringUtils.*;
+
+import java.util.Iterator;
+
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.ReturnableEvaluator;
+import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.Traverser;
+import org.neo4j.graphdb.Traverser.Order;
+
+import com.neoprojectmanager.model.TaskImpl.RELATIONSHIP;
 
 public class Project extends NodeWrapper {
 	enum PROPERTY {
@@ -19,6 +28,7 @@ public class Project extends NodeWrapper {
 
 	/**
 	 * TODO Check that name is unique; needs indexing...
+	 * 
 	 * @param name
 	 * @param gdbs
 	 */
@@ -27,10 +37,14 @@ public class Project extends NodeWrapper {
 		setName(name);
 	}
 
-	public Task createTask(String name) {
+	Project(Node node, GraphDatabaseService gdbs) {
+		super(node, gdbs);
+	}
+
+	public TaskImpl createTaskImpl(String name) {
 		Transaction tx = this.gdbs.beginTx();
 		try {
-			Task n = new Task(this.gdbs.createNode(), this.gdbs);
+			TaskImpl n = new TaskImpl(this.gdbs.createNode(), this.gdbs);
 			n.setName(name);
 			tx.success();
 			return n;
@@ -53,7 +67,7 @@ public class Project extends NodeWrapper {
 			Node task = gdbs.getNodeById(id);
 			Relationship r = task.getSingleRelationship(
 					RELATIONSHIP.INCLUDE_TASK, Direction.INCOMING);
-			if (r != null && r.getStartNode().getId() == this.node.getId()) {
+			if (r != null && r.getStartNode().getId() == this.getId()) {
 				r.delete();
 				task.delete();
 			}
@@ -74,13 +88,41 @@ public class Project extends NodeWrapper {
 	}
 
 	public Project createSubProject(String name) {
-		Project subProject = new Project(name, gdbs);
-		TaskRelationship r = createRelationShip(this, RELATIONSHIP.INCLUDE_PROJECT, subProject);
-		return subProject;
+		Transaction tx = gdbs.beginTx();
+		try {
+			Project subProject = new Project(name, gdbs);
+			createRelationShip(this, RELATIONSHIP.INCLUDE_PROJECT, subProject);
+			tx.success();
+			return subProject;
+		} finally {
+			tx.finish();
+		}
 	}
 
 	public TaskRelationship allocateResource(Resource resource) {
 		return createRelationShip(this, RELATIONSHIP.HOLD_RESOURCE, resource);
 	}
 
+	public Iterator<Project> getSubProjects() {
+		return new Iterator<Project>() {
+			private final Iterator<Node> iterator = traverse(
+					Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
+					ReturnableEvaluator.ALL_BUT_START_NODE,
+					RELATIONSHIP.INCLUDE_PROJECT, Direction.OUTGOING).iterator();
+
+			public boolean hasNext() {
+				return iterator.hasNext();
+			}
+
+			public Project next() {
+				// Should return an immutable object?
+				Node nextNode = iterator.next();
+				return new Project(nextNode, gdbs);
+			}
+
+			public void remove() {
+				iterator.remove();
+			}
+		};
+	}
 }
