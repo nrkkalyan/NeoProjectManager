@@ -53,6 +53,15 @@ class NodeWrapper extends PropertyContainerWrapper {
 		return node.traverse(order, stopEvaluator, returnableEvaluator,
 				relationship, direction);
 	}
+	
+	Traverser traverse(Order order, StopEvaluator stopEvaluator,
+			ReturnableEvaluator returnableEvaluator,
+			RelationshipType relationship, Direction direction,
+			RelationshipType relationship2, Direction direction2) {
+
+		return node.traverse(order, stopEvaluator, returnableEvaluator,
+				relationship, direction, relationship2, direction2);
+	}
 
 	protected boolean hasRelationship(RelationshipType relationship,
 			Direction direction) {

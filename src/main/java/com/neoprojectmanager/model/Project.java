@@ -12,6 +12,7 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.ReturnableEvaluator;
 import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.TraversalPosition;
 import org.neo4j.graphdb.Traverser.Order;
 
 public class Project extends NodeWrapper {
@@ -25,8 +26,6 @@ public class Project extends NodeWrapper {
 
 	protected Project(Node node, GraphDatabaseService gdbs) {
 		super(node, gdbs);
-		if (!this.getClass().getName().equals(node.getProperty(com.neoprojectmanager.model.NodeWrapper.PROPERTY._CLASS.name(), null)))
-			throw new IllegalArgumentException("THE GIVEN NODE IS NOT RECOGNISED AS A PROJECT NODE");
 	}
 
 	/**
@@ -41,7 +40,8 @@ public class Project extends NodeWrapper {
 	}
 
 	public ProjectRelationship allocateResource(Resource resource) {
-		return new ProjectRelationship(createRelationShip(this, RELATIONSHIP.HOLD_RESOURCE, resource), gdbs);
+		return new ProjectRelationship(createRelationShip(this,
+				RELATIONSHIP.HOLD_RESOURCE, resource), gdbs);
 	}
 
 	public Project createSubProject(String name) {
@@ -60,6 +60,7 @@ public class Project extends NodeWrapper {
 		Transaction tx = this.gdbs.beginTx();
 		try {
 			Task n = new TaskImpl(name, this.gdbs);
+			createRelationShip(this, RELATIONSHIP.INCLUDE_TASK, (TaskImpl) n);
 			tx.success();
 			return n;
 		} finally {
@@ -73,6 +74,7 @@ public class Project extends NodeWrapper {
 
 	/**
 	 * Return the subProjects of this project.
+	 * 
 	 * @return
 	 */
 	public Iterator<Project> getSubProjects() {
@@ -101,6 +103,7 @@ public class Project extends NodeWrapper {
 
 	/**
 	 * Returns the tasks associated with this project.
+	 * 
 	 * @return
 	 */
 	public Iterator<Task> getTasks() {
@@ -125,22 +128,51 @@ public class Project extends NodeWrapper {
 	}
 
 	/**
-	 * REturn not only the dasks attached to this project but the tasks attached to the subprojects too.
+	 * REturn not only the dasks attached to this project but the tasks attached
+	 * to the subprojects too.
+	 * 
 	 * @return
 	 */
 	public Iterator<Task> getTasksAndSubtasks() {
-		// TODO
-		return null;
+		return new Iterator<Task>() {
+			class r implements ReturnableEvaluator {
+				public boolean isReturnableNode(TraversalPosition position) {
+					return position.lastRelationshipTraversed() != null
+							&& position
+									.lastRelationshipTraversed()
+									.isType(
+											com.neoprojectmanager.model.Project.RELATIONSHIP.INCLUDE_TASK);
+				}
+			}
+
+			private final Iterator<Node> iterator = traverse(
+					Order.BREADTH_FIRST, StopEvaluator.END_OF_GRAPH, new r(),
+					RELATIONSHIP.INCLUDE_TASK, Direction.OUTGOING,
+					RELATIONSHIP.INCLUDE_PROJECT, Direction.OUTGOING)
+					.iterator();
+
+			public boolean hasNext() {
+				return iterator.hasNext();
+			}
+
+			public Task next() {
+				Node nextNode = iterator.next();
+				return new TaskImpl(nextNode, gdbs);
+			}
+
+			public void remove() {
+			}
+		};
 	}
-	
+
 	public boolean hasResources() {
 		return hasRelationship(RELATIONSHIP.HOLD_RESOURCE, Direction.OUTGOING);
 	}
-	
+
 	public boolean hasSubProjects() {
 		return hasRelationship(RELATIONSHIP.INCLUDE_PROJECT, Direction.OUTGOING);
 	}
-	
+
 	public boolean hasTasks() {
 		return hasRelationship(RELATIONSHIP.INCLUDE_TASK, Direction.OUTGOING);
 	}
@@ -168,7 +200,7 @@ public class Project extends NodeWrapper {
 			tx.finish();
 		}
 	}
-	
+
 	public void setName(String value) {
 		if (isBlank(value))
 			throw new IllegalArgumentException();

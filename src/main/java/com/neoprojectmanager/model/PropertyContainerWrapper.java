@@ -28,23 +28,15 @@ abstract class PropertyContainerWrapper {
 
 	PropertyContainerWrapper(PropertyContainer propertyContainer,
 			GraphDatabaseService gdbs) {
-		if (!this.getClass().getCanonicalName().equals(
-				getProperty(PROPERTY._CLASS))) {
-			System.err
-					.println("You are trying to wrap a node that belongs to type: "
-							+ getProperty(PROPERTY._CLASS));
-			return;
-		}
 		this.gdbs = gdbs;
 		this.propertyContainer = propertyContainer;
-		setProperty(PROPERTY._CLASS, this.getClass().getName());
 	}
 
 	PropertyContainerWrapper(GraphDatabaseService gdbs) {
 		this.gdbs = gdbs;
 		this.propertyContainer = gdbs.createNode();
 		setCreationTime();
-		setProperty(PROPERTY._CLASS, this.getClass().getName());
+		setProperty(PROPERTY._CLASS, this.getClass().getCanonicalName());
 	}
 
 	protected void setProperty(Enum property, Object value)

@@ -10,7 +10,10 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.graphdb.ReturnableEvaluator;
+import org.neo4j.graphdb.StopEvaluator;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.Traverser.Order;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 
 /**
@@ -26,35 +29,66 @@ import org.neo4j.kernel.EmbeddedGraphDatabase;
  */
 public class Factory {
 	enum RELATIONSHIP implements RelationshipType {
-		PROJECTS, RESOURCES
+		PROJECTS, RESOURCES, PROJECT, RESOURCE
 	}
 
 	private GraphDatabaseService gdbs = null;
 	private String dbFolder = null;
+	private Node projectRefNode;
+	private Node resourceRefNode;
+
+	/*
+	 * TODO Can this be a static function?
+	 */
+	private void initDB(GraphDatabaseService gdbs) {
+		Node r = gdbs.getReferenceNode();
+		projectRefNode = getRefNode(gdbs, RELATIONSHIP.PROJECTS);
+		resourceRefNode = getRefNode(gdbs, RELATIONSHIP.RESOURCES);
+	}
+
+	private Node getRefNode(GraphDatabaseService gdbs, RelationshipType rel) {
+		Relationship refRelat = gdbs.getReferenceNode().getSingleRelationship(
+				rel, Direction.OUTGOING);
+		if (refRelat == null) {
+			Node refNode = gdbs.createNode();
+			gdbs.getReferenceNode().createRelationshipTo(refNode, rel);
+			return refNode;
+		} else
+			return refRelat.getEndNode();
+	}
 
 	public Factory(String dbFolder) {
 		this.dbFolder = dbFolder;
 		if (gdbs == null)
 			this.gdbs = new EmbeddedGraphDatabase(this.dbFolder);
+		Transaction tx = gdbs.beginTx();
+		try {
+			initDB(gdbs);
+			tx.success();
+		} finally {
+			tx.finish();
+		}
 	}
 
 	public Iterator<Project> getAllProjects() {
 		return new Iterator<Project>() {
-			private final Iterator<Relationship> iterator = gdbs
-					.getReferenceNode().getRelationships(RELATIONSHIP.PROJECTS,
-							Direction.OUTGOING).iterator();
+			private final Iterator<Node> iterator = projectRefNode.traverse(
+					Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
+					ReturnableEvaluator.ALL_BUT_START_NODE,
+					RELATIONSHIP.PROJECT, Direction.OUTGOING).iterator();
 
 			public boolean hasNext() {
 				return iterator.hasNext();
 			}
 
 			public Project next() {
-				Node nextNode = iterator.next().getEndNode();
+				Node nextNode = iterator.next();
 				return new Project(nextNode, gdbs);
 			}
 
 			public void remove() {
-				throw new NotImplementedException("This method is not implemented.");
+				throw new NotImplementedException(
+						"This method is not implemented.");
 			}
 		};
 	}
@@ -65,6 +99,8 @@ public class Factory {
 	public void close() {
 		this.gdbs.shutdown();
 		this.gdbs = null;
+		this.resourceRefNode = null;
+		this.projectRefNode = null;
 	}
 
 	public Project createProject(String name) {
@@ -73,6 +109,7 @@ public class Factory {
 		Transaction tx = this.gdbs.beginTx();
 		try {
 			Project n = new Project(name, this.gdbs);
+			projectRefNode.createRelationshipTo(n.node, RELATIONSHIP.PROJECT);
 			tx.success();
 			return n;
 		} finally {
@@ -86,6 +123,7 @@ public class Factory {
 		Transaction tx = this.gdbs.beginTx();
 		try {
 			Resource r = new Resource(name, this.gdbs);
+			resourceRefNode.createRelationshipTo(r.node, RELATIONSHIP.RESOURCE);
 			tx.success();
 			return r;
 		} finally {
@@ -111,8 +149,12 @@ public class Factory {
 				for (Relationship r : n.getRelationships()) {
 					r.delete();
 				}
-				n.delete();
+				if (n.getId() != 0)
+					n.delete();
 			}
+			projectRefNode = null;
+			resourceRefNode = null;
+			initDB(gdbs);
 			tx.success();
 		} finally {
 			tx.finish();
@@ -126,6 +168,15 @@ public class Factory {
 	public void populateDB() {
 		Transaction tx = gdbs.beginTx();
 		try {
+			// create Projects
+			// create subprojects
+
+			// add Task
+			// set Task dependencies
+			// set properties
+			// create resources
+			// assign resources
+
 			Project project1 = createProject("Project 1");
 			Task task1 = project1.createTask("TaskImpl 1");
 			Task task2 = project1.createTask("TaskImpl 2");

@@ -50,7 +50,7 @@ public class FactoryTest {
 	public void tearDown() throws Exception {
 	}
 
-	@Test
+//	@Test
 	public void testCreateFirstLevelDomainObjects() {
 		Project p = factory.createProject("Node1");
 		assertNotNull(p); // A node was returned.
@@ -83,20 +83,12 @@ public class FactoryTest {
 	public void testPopulateAndClearDb() {
 		Transaction tx = factory.beginTx();
 		factory.clearDB();
-		tx.success();
-		tx.finish();
-
-		tx = factory.beginTx();
 		Iterator<Project> it = factory.getAllProjects();
 		assertFalse(it.hasNext());
 		factory.populateDB();
-		tx.success();
-		tx.finish();
-
-		tx = factory.beginTx();
-		 it = factory.getAllProjects();
+		it = factory.getAllProjects();
 		assertTrue(it.hasNext());
-		factory.clearDB();
+//		factory.clearDB();
 		tx.success();
 		tx.finish();
 	}

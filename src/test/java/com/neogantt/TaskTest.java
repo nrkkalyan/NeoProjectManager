@@ -171,7 +171,6 @@ public class TaskTest extends ProjectTest {
 
 	@Test
 	public void testToJSON() {
-		assertFalse(true);
 		System.out.println("\nTASK TO JSON");
 		System.out.println(domainToJSONString(emptyProject.createTask("An empty task")) + "\n\n");
 	}
