@@ -78,11 +78,10 @@ public class Project extends NodeWrapper {
 	 * @return
 	 */
 	public Iterator<Project> getSubProjects() {
-		Iterator<Project> itp = getNodeWrapperIterator(Project.class,
+		return getNodeWrapperIterator(Project.class,
 				Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
 				ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(
 						RELATIONSHIP.INCLUDE_PROJECT, Direction.OUTGOING));
-		return itp;
 	}
 
 	/**
@@ -104,30 +103,15 @@ public class Project extends NodeWrapper {
 	 * @return
 	 */
 	public Iterator<Task> getTasksAndSubtasks() {
-		return new Iterator<Task>() {
-			private final Iterator<Node> iterator = traverse(
-					Order.BREADTH_FIRST, StopEvaluator.END_OF_GRAPH,
-					new IncludedTaskEvaluator(), RELATIONSHIP.INCLUDE_TASK,
-					Direction.OUTGOING, RELATIONSHIP.INCLUDE_PROJECT,
-					Direction.OUTGOING).iterator();
-
-			public boolean hasNext() {
-				return iterator.hasNext();
-			}
-
-			public Task next() {
-				Node nextNode = iterator.next();
-				return new Task(nextNode, gdbs);
-			}
-
-			public void remove() {
-			}
-		};
+		return getNodeWrapperIterator(Task.class,
+				Order.BREADTH_FIRST, StopEvaluator.END_OF_GRAPH,
+				new IncludedTaskEvaluator(), new RelTup(
+						RELATIONSHIP.INCLUDE_TASK, Direction.OUTGOING),
+				new RelTup(RELATIONSHIP.INCLUDE_PROJECT, Direction.OUTGOING));
 	}
 
 	/**
 	 * Returns the nodes that have an INCLUDE_TASK relationship INCOMING
-	 * 
 	 * @author xan
 	 * 
 	 */

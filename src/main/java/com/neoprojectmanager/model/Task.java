@@ -21,62 +21,43 @@ public class Task extends NodeWrapper {
 	enum PROPERTY {
 		NAME, CREATED_ON, START_DATE, DURATION_IN_MINUTES, COST
 	}
-	
+
 	enum RELATIONSHIP implements RelationshipType {
 		DEPEND_ON
 	}
-	
+
 	Task(Node node, GraphDatabaseService gdbs) {
 		super(node, gdbs);
 	}
-	
+
 	Task(String name, GraphDatabaseService gdbs) {
 		super(gdbs);
 		setName(name);
 	}
 
 	public TaskRelationship addDependentOn(Task other) {
-		return new TaskRelationship(createRelationShip(other, RELATIONSHIP.DEPEND_ON,
-				this), gdbs);
+		return new TaskRelationship(createRelationShip(other,
+				RELATIONSHIP.DEPEND_ON, this), gdbs);
 	}
 
 	public TaskRelationship addDependent(Task other) {
-		return new TaskRelationship(createRelationShip(this, RELATIONSHIP.DEPEND_ON,
-				other), gdbs);
+		return new TaskRelationship(createRelationShip(this,
+				RELATIONSHIP.DEPEND_ON, other), gdbs);
 	}
 
 	public Iterator<Task> getDependentTasks() {
-		return new Iterator<Task>() {
-			private final Iterator<Node> iterator = traverse(
-					Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
-					ReturnableEvaluator.ALL_BUT_START_NODE,
-					new RelTup(RELATIONSHIP.DEPEND_ON, Direction.OUTGOING))
-					.iterator();
-
-			public boolean hasNext() {
-				return iterator.hasNext();
-			}
-
-			public Task next() {
-				Node nextNode = iterator.next();
-				return new Task(nextNode, gdbs);
-			}
-
-			public void remove() {
-				iterator.remove();
-			}
-		};
+		return getNodeWrapperIterator(Task.class,
+				Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
+				ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(
+						RELATIONSHIP.DEPEND_ON, Direction.OUTGOING));
 	}
 
 	public boolean hasDependents() {
-		return hasRelationship(RELATIONSHIP.DEPEND_ON,
-				Direction.OUTGOING);
+		return hasRelationship(RELATIONSHIP.DEPEND_ON, Direction.OUTGOING);
 	}
-	
 
 	public boolean hasDependencies() {
-		return hasRelationship(RELATIONSHIP.DEPEND_ON,
-				Direction.OUTGOING);
+		return hasRelationship(RELATIONSHIP.DEPEND_ON, Direction.OUTGOING);
 	}
 
 	public void setName(String name) {

@@ -70,47 +70,17 @@ public class Factory {
 	}
 
 	public Iterator<Project> getAllProjects() {
-		return new Iterator<Project>() {
-			private final Iterator<Node> iterator = projectRefNode.traverse(
-					Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
-					ReturnableEvaluator.ALL_BUT_START_NODE,
-					RELATIONSHIP.IS_A_PROJECT, Direction.OUTGOING).iterator();
-
-			public boolean hasNext() {
-				return iterator.hasNext();
-			}
-
-			public Project next() {
-				Node nextNode = iterator.next();
-				return new Project(nextNode, gdbs);
-			}
-
-			public void remove() {
-				throw new NotImplementedException("This method is not allowed.");
-			}
-		};
+		return NodeWrapper.getNodeWrapperIterator(Project.class, gdbs,
+				projectRefNode, Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
+				ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(
+						RELATIONSHIP.IS_A_PROJECT, Direction.OUTGOING));
 	}
 
 	public Iterator<Resource> getAllResources() {
-		return new Iterator<Resource>() {
-			private final Iterator<Node> iterator = resourceRefNode.traverse(
-					Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
-					ReturnableEvaluator.ALL_BUT_START_NODE,
-					RELATIONSHIP.META_RESOURCE, Direction.OUTGOING).iterator();
-
-			public boolean hasNext() {
-				return iterator.hasNext();
-			}
-
-			public Resource next() {
-				Node nextNode = iterator.next();
-				return new Resource(nextNode, gdbs);
-			}
-
-			public void remove() {
-				throw new NotImplementedException("This method is not allowed.");
-			}
-		};
+		return NodeWrapper.getNodeWrapperIterator(Resource.class, gdbs,
+				resourceRefNode, Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
+				ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(
+						RELATIONSHIP.IS_A_RESOURCE, Direction.OUTGOING));
 	}
 
 	/**
@@ -129,7 +99,8 @@ public class Factory {
 		Transaction tx = this.gdbs.beginTx();
 		try {
 			Project n = new Project(name, this.gdbs);
-			projectRefNode.createRelationshipTo(n.node, RELATIONSHIP.IS_A_PROJECT);
+			projectRefNode.createRelationshipTo(n.node,
+					RELATIONSHIP.IS_A_PROJECT);
 			tx.success();
 			return n;
 		} finally {
@@ -143,7 +114,8 @@ public class Factory {
 		Transaction tx = this.gdbs.beginTx();
 		try {
 			Resource r = new Resource(name, this.gdbs);
-			resourceRefNode.createRelationshipTo(r.node, RELATIONSHIP.IS_A_RESOURCE);
+			resourceRefNode.createRelationshipTo(r.node,
+					RELATIONSHIP.IS_A_RESOURCE);
 			tx.success();
 			return r;
 		} finally {
@@ -156,7 +128,9 @@ public class Factory {
 		try {
 			Node n = this.gdbs.getNodeById(id);
 			Project p = null;
-			if (n.hasRelationship(RELATIONSHIP.IS_A_PROJECT, Direction.INCOMING))
+			if (n
+					.hasRelationship(RELATIONSHIP.IS_A_PROJECT,
+							Direction.INCOMING))
 				p = new Project(n, this.gdbs);
 			tx.success();
 			return p;
@@ -170,7 +144,8 @@ public class Factory {
 		try {
 			Node n = this.gdbs.getNodeById(id);
 			Resource p = null;
-			if (n.hasRelationship(RELATIONSHIP.IS_A_RESOURCE, Direction.INCOMING))
+			if (n.hasRelationship(RELATIONSHIP.IS_A_RESOURCE,
+					Direction.INCOMING))
 				p = new Resource(n, this.gdbs);
 			tx.success();
 			return p;

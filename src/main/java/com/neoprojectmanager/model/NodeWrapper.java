@@ -88,14 +88,22 @@ class NodeWrapper extends PropertyContainerWrapper {
 	protected <T extends NodeWrapper> Iterator<T> getNodeWrapperIterator(
 			final Class<T> t, final Order order, final StopEvaluator stopEv,
 			final ReturnableEvaluator retEv, final RelTup... relTuple) {
+		return getNodeWrapperIterator(t, gdbs, node, order, stopEv, retEv,
+				relTuple);
+	}
+
+	public static <T extends NodeWrapper> Iterator<T> getNodeWrapperIterator(
+			final Class<T> t, final GraphDatabaseService gdbs, final Node node,
+			final Order order, final StopEvaluator stopEv,
+			final ReturnableEvaluator retEv, final RelTup... relTuple) {
 		return new Iterator<T>() {
 			/**
 			 * That the nodes returned from this traverser are correctly managed
 			 * by the NodeWrapper class specified can be checked only at
 			 * runtime.
 			 */
-			private final Iterator<Node> iterator = traverse(order, stopEv,
-					retEv, relTuple).iterator();
+			private final Iterator<Node> iterator = node.traverse(order,
+					stopEv, retEv, flattenRelTuples(relTuple)).iterator();
 
 			public boolean hasNext() {
 				return iterator.hasNext();
