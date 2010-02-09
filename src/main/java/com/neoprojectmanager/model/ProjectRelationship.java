@@ -7,6 +7,7 @@ public class ProjectRelationship extends RelationshipWrapper {
 	
 	protected ProjectRelationship(Relationship r, GraphDatabaseService gdbs) {
 		super(r, gdbs);
+		setCreationTime();
 	}
 	
 }

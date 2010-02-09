@@ -1,5 +1,6 @@
 package com.neogantt;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -19,6 +20,7 @@ import org.neo4j.graphdb.Transaction;
 
 import com.neoprojectmanager.model.Factory;
 import com.neoprojectmanager.model.Project;
+import com.neoprojectmanager.model.Resource;
 
 public class FactoryTest {
 
@@ -50,14 +52,25 @@ public class FactoryTest {
 	public void tearDown() throws Exception {
 	}
 
-//	@Test
+	/**
+	 * First level objects are actually Project and Resources, as they can exist
+	 * independently.
+	 */
+	@Test
 	public void testCreateFirstLevelDomainObjects() {
-		Project p = factory.createProject("Node1");
+		Project p = factory.createProject("Project 1");
 		assertNotNull(p); // A node was returned.
-		assertNotNull(factory.getProjectById(p.getId())); // It is actually in the
+		assertNotNull(factory.getProjectById(p.getId())); // It is actually in
+															// the
 		// database
-		assertEquals("Node1", p.getName()); // contains the mandatory property
+		assertEquals("Project 1", p.getName()); // contains the mandatory
+												// property
 		// set before.
+
+		Resource r = factory.createResource("REsource 1");
+		assertNotNull(r);
+		assertNull(factory.getProjectById(r.getId())); // Just to check that it can distinguish project and resources
+		
 	}
 
 	@Test
@@ -88,7 +101,7 @@ public class FactoryTest {
 		factory.populateDB();
 		it = factory.getAllProjects();
 		assertTrue(it.hasNext());
-//		factory.clearDB();
+		// factory.clearDB();
 		tx.success();
 		tx.finish();
 	}

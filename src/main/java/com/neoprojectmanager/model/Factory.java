@@ -29,7 +29,7 @@ import org.neo4j.kernel.EmbeddedGraphDatabase;
  */
 public class Factory {
 	enum RELATIONSHIP implements RelationshipType {
-		PROJECTS, RESOURCES, PROJECT, RESOURCE
+		META_PROJECT, META_RESOURCE, IS_A_PROJECT, IS_A_RESOURCE
 	}
 
 	private GraphDatabaseService gdbs = null;
@@ -41,9 +41,8 @@ public class Factory {
 	 * TODO Can this be a static function?
 	 */
 	private void initDB(GraphDatabaseService gdbs) {
-		Node r = gdbs.getReferenceNode();
-		projectRefNode = getRefNode(gdbs, RELATIONSHIP.PROJECTS);
-		resourceRefNode = getRefNode(gdbs, RELATIONSHIP.RESOURCES);
+		projectRefNode = getRefNode(gdbs, RELATIONSHIP.META_PROJECT);
+		resourceRefNode = getRefNode(gdbs, RELATIONSHIP.META_RESOURCE);
 	}
 
 	private Node getRefNode(GraphDatabaseService gdbs, RelationshipType rel) {
@@ -75,7 +74,7 @@ public class Factory {
 			private final Iterator<Node> iterator = projectRefNode.traverse(
 					Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
 					ReturnableEvaluator.ALL_BUT_START_NODE,
-					RELATIONSHIP.PROJECT, Direction.OUTGOING).iterator();
+					RELATIONSHIP.IS_A_PROJECT, Direction.OUTGOING).iterator();
 
 			public boolean hasNext() {
 				return iterator.hasNext();
@@ -87,8 +86,29 @@ public class Factory {
 			}
 
 			public void remove() {
-				throw new NotImplementedException(
-						"This method is not implemented.");
+				throw new NotImplementedException("This method is not allowed.");
+			}
+		};
+	}
+
+	public Iterator<Resource> getAllResources() {
+		return new Iterator<Resource>() {
+			private final Iterator<Node> iterator = resourceRefNode.traverse(
+					Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
+					ReturnableEvaluator.ALL_BUT_START_NODE,
+					RELATIONSHIP.META_RESOURCE, Direction.OUTGOING).iterator();
+
+			public boolean hasNext() {
+				return iterator.hasNext();
+			}
+
+			public Resource next() {
+				Node nextNode = iterator.next();
+				return new Resource(nextNode, gdbs);
+			}
+
+			public void remove() {
+				throw new NotImplementedException("This method is not allowed.");
 			}
 		};
 	}
@@ -109,7 +129,7 @@ public class Factory {
 		Transaction tx = this.gdbs.beginTx();
 		try {
 			Project n = new Project(name, this.gdbs);
-			projectRefNode.createRelationshipTo(n.node, RELATIONSHIP.PROJECT);
+			projectRefNode.createRelationshipTo(n.node, RELATIONSHIP.IS_A_PROJECT);
 			tx.success();
 			return n;
 		} finally {
@@ -123,7 +143,7 @@ public class Factory {
 		Transaction tx = this.gdbs.beginTx();
 		try {
 			Resource r = new Resource(name, this.gdbs);
-			resourceRefNode.createRelationshipTo(r.node, RELATIONSHIP.RESOURCE);
+			resourceRefNode.createRelationshipTo(r.node, RELATIONSHIP.IS_A_RESOURCE);
 			tx.success();
 			return r;
 		} finally {
@@ -134,7 +154,24 @@ public class Factory {
 	public Project getProjectById(long id) {
 		Transaction tx = this.gdbs.beginTx();
 		try {
-			Project p = new Project(this.gdbs.getNodeById(id), this.gdbs);
+			Node n = this.gdbs.getNodeById(id);
+			Project p = null;
+			if (n.hasRelationship(RELATIONSHIP.IS_A_PROJECT, Direction.INCOMING))
+				p = new Project(n, this.gdbs);
+			tx.success();
+			return p;
+		} finally {
+			tx.finish();
+		}
+	}
+
+	public Resource getResourceById(long id) {
+		Transaction tx = this.gdbs.beginTx();
+		try {
+			Node n = this.gdbs.getNodeById(id);
+			Resource p = null;
+			if (n.hasRelationship(RELATIONSHIP.IS_A_RESOURCE, Direction.INCOMING))
+				p = new Resource(n, this.gdbs);
 			tx.success();
 			return p;
 		} finally {

@@ -19,7 +19,7 @@ public class TaskCtrl extends HttpServlet {
 //	private static final String ID = "id";
 //
 //	private Factory getFactory() {
-//		return (Factory) getServletContext().getAttribute(RESOURCE.NEO4J_INSTANCE.name());
+//		return (Factory) getServletContext().getAttribute(IS_A_RESOURCE.NEO4J_INSTANCE.name());
 //	}
 //
 //	private void details(HttpServletRequest request,
@@ -185,7 +185,7 @@ public class TaskCtrl extends HttpServlet {
 //	public void delete(HttpServletRequest req, HttpServletResponse resp)
 //			throws IOException {
 //		Factory tf = (Factory) getServletContext().getAttribute(
-//				RESOURCE.NEO4J_INSTANCE.name());
+//				IS_A_RESOURCE.NEO4J_INSTANCE.name());
 //		long taskID = Long.valueOf(req.getParameter(ID));
 ////		tf.removeTaskById(taskID);
 //		resp.getWriter().write("DELETE SUCCESSFUL");

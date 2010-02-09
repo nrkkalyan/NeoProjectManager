@@ -59,8 +59,8 @@ public class Project extends NodeWrapper {
 	public Task createTask(String name) {
 		Transaction tx = this.gdbs.beginTx();
 		try {
-			Task n = new TaskImpl(name, this.gdbs);
-			createRelationShip(this, RELATIONSHIP.INCLUDE_TASK, (TaskImpl) n);
+			Task n = new Task(name, this.gdbs);
+			createRelationShip(this, RELATIONSHIP.INCLUDE_TASK, n);
 			tx.success();
 			return n;
 		} finally {
@@ -80,10 +80,11 @@ public class Project extends NodeWrapper {
 	public Iterator<Project> getSubProjects() {
 		return new Iterator<Project>() {
 			private final Iterator<Node> iterator = traverse(
-					Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
+					Order.BREADTH_FIRST,
+					StopEvaluator.DEPTH_ONE,
 					ReturnableEvaluator.ALL_BUT_START_NODE,
-					RELATIONSHIP.INCLUDE_PROJECT, Direction.OUTGOING)
-					.iterator();
+					new RelTup(RELATIONSHIP.INCLUDE_PROJECT,
+							Direction.OUTGOING)).iterator();
 
 			public boolean hasNext() {
 				return iterator.hasNext();
@@ -107,11 +108,23 @@ public class Project extends NodeWrapper {
 	 * @return
 	 */
 	public Iterator<Task> getTasks() {
+		return getNodeWrapperIterator(Task.class, new RelTup(
+				RELATIONSHIP.INCLUDE_TASK, Direction.OUTGOING));
+	}
+
+	/**
+	 * Return not only the dasks attached to this project but the tasks attached
+	 * to the subprojects too.
+	 * 
+	 * @return
+	 */
+	public Iterator<Task> getTasksAndSubtasks() {
 		return new Iterator<Task>() {
 			private final Iterator<Node> iterator = traverse(
-					Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
-					ReturnableEvaluator.ALL_BUT_START_NODE,
-					RELATIONSHIP.INCLUDE_TASK, Direction.OUTGOING).iterator();
+					Order.BREADTH_FIRST, StopEvaluator.END_OF_GRAPH,
+					new IncludedTaskEvaluator(), RELATIONSHIP.INCLUDE_TASK,
+					Direction.OUTGOING, RELATIONSHIP.INCLUDE_PROJECT,
+					Direction.OUTGOING).iterator();
 
 			public boolean hasNext() {
 				return iterator.hasNext();
@@ -119,7 +132,7 @@ public class Project extends NodeWrapper {
 
 			public Task next() {
 				Node nextNode = iterator.next();
-				return new TaskImpl(nextNode, gdbs);
+				return new Task(nextNode, gdbs);
 			}
 
 			public void remove() {
@@ -128,41 +141,19 @@ public class Project extends NodeWrapper {
 	}
 
 	/**
-	 * REturn not only the dasks attached to this project but the tasks attached
-	 * to the subprojects too.
+	 * Returns the nodes that have an INCLUDE_TASK relationship INCOMING
 	 * 
-	 * @return
+	 * @author xan
+	 * 
 	 */
-	public Iterator<Task> getTasksAndSubtasks() {
-		return new Iterator<Task>() {
-			class r implements ReturnableEvaluator {
-				public boolean isReturnableNode(TraversalPosition position) {
-					return position.lastRelationshipTraversed() != null
-							&& position
-									.lastRelationshipTraversed()
-									.isType(
-											com.neoprojectmanager.model.Project.RELATIONSHIP.INCLUDE_TASK);
-				}
-			}
-
-			private final Iterator<Node> iterator = traverse(
-					Order.BREADTH_FIRST, StopEvaluator.END_OF_GRAPH, new r(),
-					RELATIONSHIP.INCLUDE_TASK, Direction.OUTGOING,
-					RELATIONSHIP.INCLUDE_PROJECT, Direction.OUTGOING)
-					.iterator();
-
-			public boolean hasNext() {
-				return iterator.hasNext();
-			}
-
-			public Task next() {
-				Node nextNode = iterator.next();
-				return new TaskImpl(nextNode, gdbs);
-			}
-
-			public void remove() {
-			}
-		};
+	class IncludedTaskEvaluator implements ReturnableEvaluator {
+		public boolean isReturnableNode(TraversalPosition position) {
+			return position.lastRelationshipTraversed() != null
+					&& position
+							.lastRelationshipTraversed()
+							.isType(
+									com.neoprojectmanager.model.Project.RELATIONSHIP.INCLUDE_TASK);
+		}
 	}
 
 	public boolean hasResources() {
