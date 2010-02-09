@@ -27,7 +27,11 @@ public class Resource extends NodeWrapper {
 			throw new IllegalArgumentException();
 		setProperty(PROPERTY.NAME, value);
 	}
-
+	
+	public String getName() {
+		return (String) getProperty(PROPERTY.NAME);
+	}
+	
 	public void setCost(Long cents) {
 		setProperty(PROPERTY.COST, cents);
 	}
@@ -35,8 +39,5 @@ public class Resource extends NodeWrapper {
 	public Long getCost() {
 		return (Long) getPropertyOrNull(PROPERTY.COST);
 	}
-	
-	public String getName() {
-		return (String) getProperty(PROPERTY.NAME);
-	}
+
 }

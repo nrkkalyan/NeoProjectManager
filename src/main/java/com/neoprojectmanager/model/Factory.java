@@ -4,7 +4,6 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.util.Iterator;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -37,23 +36,19 @@ public class Factory {
 	private Node projectRefNode;
 	private Node resourceRefNode;
 
-	/*
-	 * TODO Can this be a static function?
-	 */
 	private void initDB(GraphDatabaseService gdbs) {
 		projectRefNode = getRefNode(gdbs, RELATIONSHIP.META_PROJECT);
 		resourceRefNode = getRefNode(gdbs, RELATIONSHIP.META_RESOURCE);
 	}
 
-	private Node getRefNode(GraphDatabaseService gdbs, RelationshipType rel) {
-		Relationship refRelat = gdbs.getReferenceNode().getSingleRelationship(
-				rel, Direction.OUTGOING);
-		if (refRelat == null) {
+	private Node getRefNode(GraphDatabaseService gdbs, RelationshipType refRelType) {
+		Relationship refRel = gdbs.getReferenceNode().getSingleRelationship(refRelType, Direction.OUTGOING);
+		if (refRel == null) {
 			Node refNode = gdbs.createNode();
-			gdbs.getReferenceNode().createRelationshipTo(refNode, rel);
+			gdbs.getReferenceNode().createRelationshipTo(refNode, refRelType);
 			return refNode;
 		} else
-			return refRelat.getEndNode();
+			return refRel.getEndNode();
 	}
 
 	public Factory(String dbFolder) {
@@ -70,17 +65,15 @@ public class Factory {
 	}
 
 	public Iterator<Project> getAllProjects() {
-		return NodeWrapper.getNodeWrapperIterator(Project.class, gdbs,
-				projectRefNode, Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
-				ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(
-						RELATIONSHIP.IS_A_PROJECT, Direction.OUTGOING));
+		return NodeWrapper.getNodeWrapperIterator(Project.class, gdbs, projectRefNode, Order.BREADTH_FIRST,
+				StopEvaluator.DEPTH_ONE, ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(RELATIONSHIP.IS_A_PROJECT,
+						Direction.OUTGOING));
 	}
 
 	public Iterator<Resource> getAllResources() {
-		return NodeWrapper.getNodeWrapperIterator(Resource.class, gdbs,
-				resourceRefNode, Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
-				ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(
-						RELATIONSHIP.IS_A_RESOURCE, Direction.OUTGOING));
+		return NodeWrapper.getNodeWrapperIterator(Resource.class, gdbs, resourceRefNode, Order.BREADTH_FIRST,
+				StopEvaluator.DEPTH_ONE, ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(RELATIONSHIP.IS_A_RESOURCE,
+						Direction.OUTGOING));
 	}
 
 	/**
@@ -99,8 +92,7 @@ public class Factory {
 		Transaction tx = this.gdbs.beginTx();
 		try {
 			Project n = new Project(name, this.gdbs);
-			projectRefNode.createRelationshipTo(n.node,
-					RELATIONSHIP.IS_A_PROJECT);
+			projectRefNode.createRelationshipTo(n.getNode(), RELATIONSHIP.IS_A_PROJECT);
 			tx.success();
 			return n;
 		} finally {
@@ -114,8 +106,7 @@ public class Factory {
 		Transaction tx = this.gdbs.beginTx();
 		try {
 			Resource r = new Resource(name, this.gdbs);
-			resourceRefNode.createRelationshipTo(r.node,
-					RELATIONSHIP.IS_A_RESOURCE);
+			resourceRefNode.createRelationshipTo(r.getNode(), RELATIONSHIP.IS_A_RESOURCE);
 			tx.success();
 			return r;
 		} finally {
@@ -128,9 +119,7 @@ public class Factory {
 		try {
 			Node n = this.gdbs.getNodeById(id);
 			Project p = null;
-			if (n
-					.hasRelationship(RELATIONSHIP.IS_A_PROJECT,
-							Direction.INCOMING))
+			if (n.hasRelationship(RELATIONSHIP.IS_A_PROJECT, Direction.INCOMING))
 				p = new Project(n, this.gdbs);
 			tx.success();
 			return p;
@@ -144,8 +133,7 @@ public class Factory {
 		try {
 			Node n = this.gdbs.getNodeById(id);
 			Resource p = null;
-			if (n.hasRelationship(RELATIONSHIP.IS_A_RESOURCE,
-					Direction.INCOMING))
+			if (n.hasRelationship(RELATIONSHIP.IS_A_RESOURCE, Direction.INCOMING))
 				p = new Resource(n, this.gdbs);
 			tx.success();
 			return p;
@@ -180,14 +168,13 @@ public class Factory {
 	public void populateDB() {
 		Transaction tx = gdbs.beginTx();
 		try {
-			// create Projects
-			// create subprojects
-
-			// add Task
-			// set Task dependencies
-			// set properties
-			// create resources
-			// assign resources
+			/* create Projects
+			 * create subprojects
+			 * add Task 
+			 * set Task dependencies
+			 * set properties
+			 * create resources
+			 * assign resources */
 
 			Project project1 = createProject("Project 1");
 			Task task1 = project1.createTask("TaskImpl 1");

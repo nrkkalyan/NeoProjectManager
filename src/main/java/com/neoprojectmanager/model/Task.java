@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -23,7 +24,7 @@ public class Task extends NodeWrapper {
 	}
 
 	enum RELATIONSHIP implements RelationshipType {
-		DEPEND_ON
+		DEPEND_ON, USE_RESOURCE
 	}
 
 	Task(Node node, GraphDatabaseService gdbs) {
@@ -52,12 +53,19 @@ public class Task extends NodeWrapper {
 						RELATIONSHIP.DEPEND_ON, Direction.OUTGOING));
 	}
 
+	public Iterator<Resource> getResources() {
+		return getNodeWrapperIterator(Resource.class,
+				Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
+				ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(
+						RELATIONSHIP.USE_RESOURCE, Direction.OUTGOING));
+	}
+	
 	public boolean hasDependents() {
 		return hasRelationship(RELATIONSHIP.DEPEND_ON, Direction.OUTGOING);
 	}
 
 	public boolean hasDependencies() {
-		return hasRelationship(RELATIONSHIP.DEPEND_ON, Direction.OUTGOING);
+		return hasRelationship(RELATIONSHIP.DEPEND_ON, Direction.INCOMING);
 	}
 
 	public void setName(String name) {
@@ -78,12 +86,10 @@ public class Task extends NodeWrapper {
 	}
 
 	public Date getStartDate() {
-		Calendar startDate = GregorianCalendar.getInstance();
 		Long timeInMillis = (Long) getPropertyOrNull(PROPERTY.START_DATE);
 		if (timeInMillis == null)
 			return null;
-		startDate.setTimeInMillis(timeInMillis);
-		return startDate.getTime();
+		return new Date(timeInMillis);
 	}
 
 	/**
@@ -97,11 +103,11 @@ public class Task extends NodeWrapper {
 	}
 
 	public Integer getDurationInMinutes() {
-		return (Integer) getPropertyOrNull(PROPERTY.DURATION_IN_MINUTES);
+		return (Integer) getProperty(PROPERTY.DURATION_IN_MINUTES, 0);
 	}
 
 	public Project getProject() {
-		Transaction tx = this.gdbs.beginTx();
+		Transaction tx = beginTx();
 		try {
 			Relationship r = getSingleRelationship(
 					Project.RELATIONSHIP.INCLUDE_TASK, Direction.INCOMING);

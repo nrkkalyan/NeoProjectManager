@@ -59,27 +59,33 @@ public class Project extends NodeWrapper {
 	public Task createTask(String name) {
 		Transaction tx = this.gdbs.beginTx();
 		try {
-			Task n = new Task(name, this.gdbs);
-			createRelationShip(this, RELATIONSHIP.INCLUDE_TASK, n);
+			Task task = new Task(name, this.gdbs);
+			createRelationShip(this, RELATIONSHIP.INCLUDE_TASK, task);
 			tx.success();
-			return n;
+			return task;
 		} finally {
 			tx.finish();
 		}
 	}
 
 	public String getName() {
-		return (String) getPropertyOrNull(PROPERTY.NAME);
+		return (String) getProperty(PROPERTY.NAME);
 	}
-
+	
+	public void setName(String value) {
+		if (isBlank(value))
+			throw new IllegalArgumentException();
+		setProperty(PROPERTY.NAME, value);
+	}
+	
 	/**
 	 * Return the subProjects of this project.
 	 * 
 	 * @return
 	 */
 	public Iterator<Project> getSubProjects() {
-		return getNodeWrapperIterator(Project.class,
-				Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
+		return getNodeWrapperIterator(Project.class, Order.BREADTH_FIRST,
+				StopEvaluator.DEPTH_ONE,
 				ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(
 						RELATIONSHIP.INCLUDE_PROJECT, Direction.OUTGOING));
 	}
@@ -97,21 +103,21 @@ public class Project extends NodeWrapper {
 	}
 
 	/**
-	 * Return not only the dasks attached to this project but the tasks attached
-	 * to the subprojects too.
+	 * Return not only the tasks attached to this project but the tasks attached
+	 * to the sub-projects too.
 	 * 
 	 * @return
 	 */
 	public Iterator<Task> getTasksAndSubtasks() {
-		return getNodeWrapperIterator(Task.class,
-				Order.BREADTH_FIRST, StopEvaluator.END_OF_GRAPH,
-				new IncludedTaskEvaluator(), new RelTup(
-						RELATIONSHIP.INCLUDE_TASK, Direction.OUTGOING),
+		return getNodeWrapperIterator(Task.class, Order.BREADTH_FIRST,
+				StopEvaluator.END_OF_GRAPH, new IncludedTaskEvaluator(),
+				new RelTup(RELATIONSHIP.INCLUDE_TASK, Direction.OUTGOING),
 				new RelTup(RELATIONSHIP.INCLUDE_PROJECT, Direction.OUTGOING));
 	}
 
 	/**
-	 * Returns the nodes that have an INCLUDE_TASK relationship INCOMING
+	 * Filters the nodes that have an INCLUDE_TASK relationship INCOMING
+	 * 
 	 * @author xan
 	 * 
 	 */
@@ -161,9 +167,4 @@ public class Project extends NodeWrapper {
 		}
 	}
 
-	public void setName(String value) {
-		if (isBlank(value))
-			throw new IllegalArgumentException();
-		setProperty(PROPERTY.NAME, value);
-	}
 }

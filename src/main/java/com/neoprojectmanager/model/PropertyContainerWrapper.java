@@ -8,8 +8,9 @@ import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Transaction;
 
 /**
- * Implements utility methods to manage properties common to nodes and
- * relationships wrappers.
+ * Implements common methods to manage properties of nodes and relationships.
+ * Transparently set some default properties like the creation timestamp or the
+ * NodeWrapper subclass that instantiated this entity.
  * 
  * @author xan
  * 
@@ -26,12 +27,23 @@ abstract class PropertyContainerWrapper {
 	protected GraphDatabaseService gdbs;
 	protected PropertyContainer propertyContainer;
 
-	PropertyContainerWrapper(PropertyContainer propertyContainer,
-			GraphDatabaseService gdbs) {
+	/**
+	 * Caled when wrapping an existing entity.
+	 * 
+	 * @param propertyContainer
+	 * @param gdbs
+	 */
+	PropertyContainerWrapper(PropertyContainer propertyContainer, GraphDatabaseService gdbs) {
 		this.gdbs = gdbs;
 		this.propertyContainer = propertyContainer;
 	}
 
+	/**
+	 * Called when a new node is created. Should never be used to instantiate a
+	 * Relationship wrapper.
+	 * 
+	 * @param gdbs
+	 */
 	PropertyContainerWrapper(GraphDatabaseService gdbs) {
 		this.gdbs = gdbs;
 		this.propertyContainer = gdbs.createNode();
@@ -39,8 +51,7 @@ abstract class PropertyContainerWrapper {
 		setProperty(PROPERTY._CLASS, this.getClass().getCanonicalName());
 	}
 
-	protected void setProperty(Enum property, Object value)
-			throws IllegalArgumentException {
+	protected void setProperty(Enum property, Object value) throws IllegalArgumentException {
 		Transaction tx = beginTx();
 		try {
 			propertyContainer.setProperty(property.name(), value);
@@ -51,9 +62,13 @@ abstract class PropertyContainerWrapper {
 	}
 
 	protected Object getPropertyOrNull(Enum property) {
+		return getProperty(property, null);
+	}
+
+	protected Object getProperty(Enum property, Object defaulz) {
 		Transaction tx = beginTx();
 		try {
-			Object value = propertyContainer.getProperty(property.name(), null);
+			Object value = propertyContainer.getProperty(property.name(), defaulz);
 			tx.success();
 			return value;
 		} finally {
@@ -99,9 +114,8 @@ abstract class PropertyContainerWrapper {
 		return gdbs.beginTx();
 	}
 
-	public void setCreationTime() {
-		setProperty(PROPERTY.CREATED_ON, Calendar.getInstance()
-				.getTimeInMillis());
+	protected void setCreationTime() {
+		setProperty(PROPERTY.CREATED_ON, Calendar.getInstance().getTimeInMillis());
 	}
 
 	public Date getCreationTime() {
