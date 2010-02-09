@@ -42,8 +42,8 @@ class NodeWrapper extends PropertyContainerWrapper {
 			NodeWrapper destination) {
 		Transaction tx = gdbs.beginTx();
 		try {
-			Relationship tr = from.getNode().createRelationshipTo(destination.getNode(),
-					type);
+			Relationship tr = from.getNode().createRelationshipTo(
+					destination.getNode(), type);
 			tx.success();
 			return tr;
 		} finally {
@@ -60,13 +60,12 @@ class NodeWrapper extends PropertyContainerWrapper {
 	}
 
 	Traverser traverse(Order order, StopEvaluator stopEvaluator,
-			ReturnableEvaluator returnableEvaluator,
-			RelTup... relTuple) {
+			ReturnableEvaluator returnableEvaluator, RelTup... relTuple) {
 
 		return node.traverse(order, stopEvaluator, returnableEvaluator,
 				flattenRelTuples(relTuple));
 	}
-	
+
 	Traverser traverse(Order order, StopEvaluator stopEvaluator,
 			ReturnableEvaluator returnableEvaluator,
 			RelationshipType relationship, Direction direction,
@@ -87,36 +86,35 @@ class NodeWrapper extends PropertyContainerWrapper {
 	}
 
 	protected <T extends NodeWrapper> Iterator<T> getNodeWrapperIterator(
-			final Class<T> t, final RelTup... relTuple) {
-				return new Iterator<T>() {
-					/**
-					 * That the nodes returned from this traverser are correctly managed
-					 * by the NodeWrapper class specified can be checked only at
-					 * runtime.
-					 */
-					private final Iterator<Node> iterator = traverse(
-							Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
-							ReturnableEvaluator.ALL_BUT_START_NODE,
-							relTuple).iterator();
-			
-					public boolean hasNext() {
-						return iterator.hasNext();
-					}
-			
-					public T next() {
-						Node nextNode = iterator.next();
-						try {
-							return t.getDeclaredConstructor(Node.class,
-									GraphDatabaseService.class).newInstance(nextNode,
-									gdbs);
-						} catch (Exception e) {
-							e.printStackTrace();
-							return null;
-						}
-					}
-			
-					public void remove() {
-					}
-				};
+			final Class<T> t, final Order order, final StopEvaluator stopEv,
+			final ReturnableEvaluator retEv, final RelTup... relTuple) {
+		return new Iterator<T>() {
+			/**
+			 * That the nodes returned from this traverser are correctly managed
+			 * by the NodeWrapper class specified can be checked only at
+			 * runtime.
+			 */
+			private final Iterator<Node> iterator = traverse(order, stopEv,
+					retEv, relTuple).iterator();
+
+			public boolean hasNext() {
+				return iterator.hasNext();
 			}
+
+			public T next() {
+				Node nextNode = iterator.next();
+				try {
+					return t.getDeclaredConstructor(Node.class,
+							GraphDatabaseService.class).newInstance(nextNode,
+							gdbs);
+				} catch (Exception e) {
+					e.printStackTrace();
+					return null;
+				}
+			}
+
+			public void remove() {
+			}
+		};
+	}
 }

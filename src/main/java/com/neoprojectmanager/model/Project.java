@@ -78,28 +78,11 @@ public class Project extends NodeWrapper {
 	 * @return
 	 */
 	public Iterator<Project> getSubProjects() {
-		return new Iterator<Project>() {
-			private final Iterator<Node> iterator = traverse(
-					Order.BREADTH_FIRST,
-					StopEvaluator.DEPTH_ONE,
-					ReturnableEvaluator.ALL_BUT_START_NODE,
-					new RelTup(RELATIONSHIP.INCLUDE_PROJECT,
-							Direction.OUTGOING)).iterator();
-
-			public boolean hasNext() {
-				return iterator.hasNext();
-			}
-
-			public Project next() {
-				// Should return an immutable object?
-				Node nextNode = iterator.next();
-				return new Project(nextNode, gdbs);
-			}
-
-			public void remove() {
-				iterator.remove();
-			}
-		};
+		Iterator<Project> itp = getNodeWrapperIterator(Project.class,
+				Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
+				ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(
+						RELATIONSHIP.INCLUDE_PROJECT, Direction.OUTGOING));
+		return itp;
 	}
 
 	/**
@@ -108,8 +91,10 @@ public class Project extends NodeWrapper {
 	 * @return
 	 */
 	public Iterator<Task> getTasks() {
-		return getNodeWrapperIterator(Task.class, new RelTup(
-				RELATIONSHIP.INCLUDE_TASK, Direction.OUTGOING));
+		return getNodeWrapperIterator(Task.class, Order.BREADTH_FIRST,
+				StopEvaluator.DEPTH_ONE,
+				ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(
+						RELATIONSHIP.INCLUDE_TASK, Direction.OUTGOING));
 	}
 
 	/**
