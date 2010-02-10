@@ -23,4 +23,18 @@ public class RelationshipWrapper extends PropertyContainerWrapper {
 			tx.finish();
 		}
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof RelationshipWrapper) {
+			RelationshipWrapper other = (RelationshipWrapper) obj;
+			return this.relationship.equals(other.relationship);
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return this.relationship.hashCode();
+	}
 }

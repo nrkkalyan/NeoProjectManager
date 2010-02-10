@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static com.neoprojectmanager.utils.Converter.*;
 
 import java.util.Calendar;
 import java.util.Iterator;
@@ -95,12 +96,12 @@ public class TaskTest extends ProjectTest {
 		assertNull(t.getStartDate());
 		// DURATION IN MINUTES
 		assertNull(t.getDurationInMinutes());
-		t.setDurationInMinutes(120);
-		assertEquals(120, (int) t.getDurationInMinutes());
-		t.setDurationInMinutes(null);
+		t.setDuration(inDays(2));
+		assertEquals(inDays(2), (long) t.getDurationInMinutes());
+		t.setDuration(null);
 		assertNull(t.getDurationInMinutes());
 		try {
-			t.setDurationInMinutes(-1);
+			t.setDuration(inDays(-1));
 			assertTrue(false);
 		} catch (IllegalArgumentException e) {
 			assertTrue(true);

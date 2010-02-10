@@ -40,14 +40,16 @@ public class Project extends NodeWrapper {
 	}
 
 	public ProjectRelationship allocateResource(Resource resource) {
-		return new ProjectRelationship(createRelationShip(this,
-				RELATIONSHIP.HOLD_RESOURCE, resource), gdbs);
+		if (resource == null)
+			throw new IllegalArgumentException("Resource can't be null.");
+		return new ProjectRelationship(createRelationShip(this, RELATIONSHIP.HOLD_RESOURCE, resource), this.gdbs);
 	}
 
 	public Project createSubProject(String name) {
-		Transaction tx = gdbs.beginTx();
+		// name will be validated by the Project constructor.
+		Transaction tx = beginTx();
 		try {
-			Project subProject = new Project(name, gdbs);
+			Project subProject = new Project(name, this.gdbs);
 			createRelationShip(this, RELATIONSHIP.INCLUDE_PROJECT, subProject);
 			tx.success();
 			return subProject;
@@ -57,7 +59,8 @@ public class Project extends NodeWrapper {
 	}
 
 	public Task createTask(String name) {
-		Transaction tx = this.gdbs.beginTx();
+		// name will be validated by the Task constructor.
+		Transaction tx = beginTx();
 		try {
 			Task task = new Task(name, this.gdbs);
 			createRelationShip(this, RELATIONSHIP.INCLUDE_TASK, task);
@@ -71,23 +74,21 @@ public class Project extends NodeWrapper {
 	public String getName() {
 		return (String) getProperty(PROPERTY.NAME);
 	}
-	
+
 	public void setName(String value) {
 		if (isBlank(value))
 			throw new IllegalArgumentException();
 		setProperty(PROPERTY.NAME, value);
 	}
-	
+
 	/**
 	 * Return the subProjects of this project.
 	 * 
 	 * @return
 	 */
 	public Iterator<Project> getSubProjects() {
-		return getNodeWrapperIterator(Project.class, Order.BREADTH_FIRST,
-				StopEvaluator.DEPTH_ONE,
-				ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(
-						RELATIONSHIP.INCLUDE_PROJECT, Direction.OUTGOING));
+		return getNodeWrapperIterator(Project.class, Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
+				ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(RELATIONSHIP.INCLUDE_PROJECT, Direction.OUTGOING));
 	}
 
 	/**
@@ -96,23 +97,20 @@ public class Project extends NodeWrapper {
 	 * @return
 	 */
 	public Iterator<Task> getTasks() {
-		return getNodeWrapperIterator(Task.class, Order.BREADTH_FIRST,
-				StopEvaluator.DEPTH_ONE,
-				ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(
-						RELATIONSHIP.INCLUDE_TASK, Direction.OUTGOING));
+		return getNodeWrapperIterator(Task.class, Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
+				ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(RELATIONSHIP.INCLUDE_TASK, Direction.OUTGOING));
 	}
 
 	/**
-	 * Return not only the tasks attached to this project but the tasks attached
-	 * to the sub-projects too.
+	 * Return not only the tasks attached to this project but also the tasks
+	 * attached to the sub-projects.
 	 * 
 	 * @return
 	 */
 	public Iterator<Task> getTasksAndSubtasks() {
-		return getNodeWrapperIterator(Task.class, Order.BREADTH_FIRST,
-				StopEvaluator.END_OF_GRAPH, new IncludedTaskEvaluator(),
-				new RelTup(RELATIONSHIP.INCLUDE_TASK, Direction.OUTGOING),
-				new RelTup(RELATIONSHIP.INCLUDE_PROJECT, Direction.OUTGOING));
+		return getNodeWrapperIterator(Task.class, Order.BREADTH_FIRST, StopEvaluator.END_OF_GRAPH,
+				new IncludedTaskEvaluator(), new RelTup(RELATIONSHIP.INCLUDE_TASK, Direction.OUTGOING), new RelTup(
+						RELATIONSHIP.INCLUDE_PROJECT, Direction.OUTGOING));
 	}
 
 	/**
@@ -124,10 +122,8 @@ public class Project extends NodeWrapper {
 	class IncludedTaskEvaluator implements ReturnableEvaluator {
 		public boolean isReturnableNode(TraversalPosition position) {
 			return position.lastRelationshipTraversed() != null
-					&& position
-							.lastRelationshipTraversed()
-							.isType(
-									com.neoprojectmanager.model.Project.RELATIONSHIP.INCLUDE_TASK);
+					&& position.lastRelationshipTraversed().isType(
+							com.neoprojectmanager.model.Project.RELATIONSHIP.INCLUDE_TASK);
 		}
 	}
 
@@ -152,11 +148,10 @@ public class Project extends NodeWrapper {
 	 * @param id
 	 */
 	public void removeTaskById(final long id) {
-		Transaction tx = gdbs.beginTx();
+		Transaction tx = beginTx();
 		try {
 			Node task = gdbs.getNodeById(id);
-			Relationship r = task.getSingleRelationship(
-					RELATIONSHIP.INCLUDE_TASK, Direction.INCOMING);
+			Relationship r = task.getSingleRelationship(RELATIONSHIP.INCLUDE_TASK, Direction.INCOMING);
 			if (r != null && r.getStartNode().getId() == this.getId()) {
 				r.delete();
 				task.delete();

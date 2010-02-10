@@ -1,7 +1,5 @@
 package com.neoprojectmanager.utils;
 
-import java.util.Iterator;
-
 import net.sf.json.JSONArray;
 import net.sf.json.JsonConfig;
 

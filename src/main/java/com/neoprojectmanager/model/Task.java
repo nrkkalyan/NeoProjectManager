@@ -4,10 +4,8 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Iterator;
 
-import org.apache.commons.lang.time.DateUtils;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -95,7 +93,7 @@ public class Task extends NodeWrapper {
 	/**
 	 * @param durationInMinutes
 	 */
-	public void setDurationInMinutes(Integer durationInMinutes)
+	public void setDuration(Long durationInMinutes)
 			throws IllegalArgumentException {
 		if (durationInMinutes != null && durationInMinutes < 0)
 			throw new IllegalArgumentException("Duration must be positive.");

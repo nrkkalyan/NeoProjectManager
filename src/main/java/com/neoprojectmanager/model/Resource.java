@@ -2,11 +2,8 @@ package com.neoprojectmanager.model;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
-import org.apache.commons.lang.StringUtils;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
-
-import com.neoprojectmanager.model.Project.PROPERTY;
 
 public class Resource extends NodeWrapper {
 	enum PROPERTY {

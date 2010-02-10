@@ -179,4 +179,19 @@ class NodeWrapper extends PropertyContainerWrapper {
 		}
 		return result;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof NodeWrapper) {
+			NodeWrapper other = (NodeWrapper) obj;
+			return this.node.equals(other.node);
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return this.node.hashCode();
+	}
+
 }

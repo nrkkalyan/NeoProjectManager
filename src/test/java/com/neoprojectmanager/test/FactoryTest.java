@@ -60,24 +60,23 @@ public class FactoryTest {
 	public void testCreateFirstLevelDomainObjects() {
 		Project p = factory.createProject("Project 1");
 		assertNotNull(p); // A node was returned.
-		assertNotNull(factory.getProjectById(p.getId())); // It is actually in
-															// the
-		// database
-		assertEquals("Project 1", p.getName()); // contains the mandatory
-												// property
-		// set before.
+		assertEquals(factory.getProjectById(p.getId()), p);
 
 		Resource r = factory.createResource("REsource 1");
 		assertNotNull(r);
-		assertNull(factory.getProjectById(r.getId())); // Just to check that it can distinguish project and resources
+		assertEquals(factory.getResourceById(r.getId()), r);
 		
+		// check that Project and Resources don't appear in the sema node-space
+		assertNull(factory.getResourceById(p.getId()));
+		assertNull(factory.getProjectById(r.getId()));
 	}
 
 	@Test
 	public void testGetInexistentFirstLevelDomainObjects() {
-		Project p = factory.getProjectById(0L);
-		assertNotNull(p); // This should be the "root" node
+
 		try {
+			Project p = factory.getProjectById(0L);
+			assertNull(p); // This should be the "root" node
 			p = factory.getProjectById(-1L);
 			assertTrue(false); // Should have thrown an exception
 		} catch (IllegalArgumentException e) {
@@ -85,7 +84,23 @@ public class FactoryTest {
 		}
 
 		try {
-			p = factory.getProjectById(1000L);
+			Project p = factory.getProjectById(1000L);
+			assertTrue(false); // Should have thrown an exception
+		} catch (org.neo4j.graphdb.NotFoundException e) {
+			assertTrue(true);
+		}
+		
+		try {
+			Resource r = factory.getResourceById(0L);
+			assertNull(r); // This should be the "root" node
+			r = factory.getResourceById(-1L);
+			assertTrue(false); // Should have thrown an exception
+		} catch (IllegalArgumentException e) {
+			assertTrue(true);
+		}
+
+		try {
+			Resource r = factory.getResourceById(1000L);
 			assertTrue(false); // Should have thrown an exception
 		} catch (org.neo4j.graphdb.NotFoundException e) {
 			assertTrue(true);

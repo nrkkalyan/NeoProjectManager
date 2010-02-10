@@ -1,6 +1,7 @@
 package com.neoprojectmanager.model;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
+import static com.neoprojectmanager.utils.Converter.*;
 
 import java.util.Iterator;
 
@@ -179,8 +180,8 @@ public class Factory {
 			Project project1 = createProject("Project 1");
 			Task task1 = project1.createTask("TaskImpl 1");
 			Task task2 = project1.createTask("TaskImpl 2");
-			task1.setDurationInMinutes(60 * 24 * 10);
-			task2.setDurationInMinutes(60 * 24 * 6);
+			task1.setDuration(inDays(10));
+			task2.setDuration(inDays(6));
 			task2.addDependentOn(task1);
 			tx.success();
 		} finally {
