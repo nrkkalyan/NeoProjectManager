@@ -122,4 +122,7 @@ abstract class PropertyContainerWrapper {
 		return new Date((Long) getProperty(PROPERTY.CREATED_ON));
 	}
 
+	public String getWrapperClassName() {
+		return (String) getProperty(PROPERTY._CLASS);
+	}
 }

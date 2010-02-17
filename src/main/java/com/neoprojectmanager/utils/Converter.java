@@ -12,16 +12,16 @@ public class Converter {
 		return sb.toString();
 	}
 
-	public static long inMinutes(long minutes) {
+	public static int inMinutes(int minutes) {
 		return minutes;
 	}
 
-	public static long inHours(long minutes) {
-		return minutes / 60;
+	public static int inHours(int hours) {
+		return hours * 60;
 	}
 
-	public static long inDays(long minutes) {
-		return minutes / 60 / 24;
+	public static int inDays(int days) {
+		return days * 24 * 60;
 	}
 
 	public static void main(String[] args) {

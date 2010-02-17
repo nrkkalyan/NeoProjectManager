@@ -35,29 +35,23 @@ public class Task extends NodeWrapper {
 	}
 
 	public TaskRelationship addDependentOn(Task other) {
-		return new TaskRelationship(createRelationShip(other,
-				RELATIONSHIP.DEPEND_ON, this), gdbs);
+		return new TaskRelationship(createRelationShip(other, RELATIONSHIP.DEPEND_ON, this), gdbs);
 	}
 
 	public TaskRelationship addDependent(Task other) {
-		return new TaskRelationship(createRelationShip(this,
-				RELATIONSHIP.DEPEND_ON, other), gdbs);
+		return new TaskRelationship(createRelationShip(this, RELATIONSHIP.DEPEND_ON, other), gdbs);
 	}
 
 	public Iterator<Task> getDependentTasks() {
-		return getNodeWrapperIterator(Task.class,
-				Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
-				ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(
-						RELATIONSHIP.DEPEND_ON, Direction.OUTGOING));
+		return getNodeWrapperIterator(Task.class, Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
+				ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(RELATIONSHIP.DEPEND_ON, Direction.OUTGOING));
 	}
 
 	public Iterator<Resource> getResources() {
-		return getNodeWrapperIterator(Resource.class,
-				Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
-				ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(
-						RELATIONSHIP.USE_RESOURCE, Direction.OUTGOING));
+		return getNodeWrapperIterator(Resource.class, Order.BREADTH_FIRST, StopEvaluator.DEPTH_ONE,
+				ReturnableEvaluator.ALL_BUT_START_NODE, new RelTup(RELATIONSHIP.USE_RESOURCE, Direction.OUTGOING));
 	}
-	
+
 	public boolean hasDependents() {
 		return hasRelationship(RELATIONSHIP.DEPEND_ON, Direction.OUTGOING);
 	}
@@ -93,22 +87,20 @@ public class Task extends NodeWrapper {
 	/**
 	 * @param durationInMinutes
 	 */
-	public void setDuration(Long durationInMinutes)
-			throws IllegalArgumentException {
+	public void setDuration(Integer durationInMinutes) throws IllegalArgumentException {
 		if (durationInMinutes != null && durationInMinutes < 0)
 			throw new IllegalArgumentException("Duration must be positive.");
 		setOrRemoveProperty(PROPERTY.DURATION_IN_MINUTES, durationInMinutes);
 	}
 
 	public Integer getDurationInMinutes() {
-		return (Integer) getProperty(PROPERTY.DURATION_IN_MINUTES, 0);
+		return (Integer) getPropertyOrNull(PROPERTY.DURATION_IN_MINUTES);
 	}
 
 	public Project getProject() {
 		Transaction tx = beginTx();
 		try {
-			Relationship r = getSingleRelationship(
-					Project.RELATIONSHIP.INCLUDE_TASK, Direction.INCOMING);
+			Relationship r = getSingleRelationship(Project.RELATIONSHIP.INCLUDE_TASK, Direction.INCOMING);
 			if (r == null)
 				return null;
 			Node n = r.getStartNode();
@@ -124,7 +116,9 @@ public class Task extends NodeWrapper {
 			return null;
 		Calendar endDate = Calendar.getInstance();
 		endDate.setTime(this.getStartDate());
-		endDate.add(Calendar.MINUTE, this.getDurationInMinutes());
+		Integer d = this.getDurationInMinutes();
+		if (d == null) d = 0;
+		endDate.add(Calendar.MINUTE, d);
 		return endDate.getTime();
 	}
 
