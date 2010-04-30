@@ -1,9 +1,8 @@
 package com.neoprojectmanager.utils;
 
+import com.neoprojectmanager.model.Task;
 import net.sf.json.JSONArray;
 import net.sf.json.JsonConfig;
-
-import com.neoprojectmanager.model.Task;
 
 public class Formatting {
 
@@ -18,8 +17,7 @@ public class Formatting {
 	}
 	
 	public static JSONArray domainToJSON(Object domain) {
-		JSONArray jsonObject = JSONArray.fromObject(domain, taskNodeJsonConfig);
-		return jsonObject;
+        return JSONArray.fromObject(domain, taskNodeJsonConfig);
 	}
 	
 }

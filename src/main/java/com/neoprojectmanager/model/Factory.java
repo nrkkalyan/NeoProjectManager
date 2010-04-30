@@ -1,20 +1,13 @@
 package com.neoprojectmanager.model;
 
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static com.neoprojectmanager.utils.Converter.*;
+import org.neo4j.graphdb.*;
+import org.neo4j.graphdb.Traverser.Order;
+import org.neo4j.kernel.EmbeddedGraphDatabase;
 
 import java.util.Iterator;
 
-import org.neo4j.graphdb.Direction;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.ReturnableEvaluator;
-import org.neo4j.graphdb.StopEvaluator;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.graphdb.Traverser.Order;
-import org.neo4j.kernel.EmbeddedGraphDatabase;
+import static com.neoprojectmanager.utils.Converter.inDays;
+import static org.apache.commons.lang.StringUtils.isBlank;
 
 /**
  * The factory is used to generate all the first-level domain model objects.

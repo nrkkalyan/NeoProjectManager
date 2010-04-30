@@ -1,11 +1,11 @@
 package com.neoprojectmanager.model;
 
-import java.util.Calendar;
-import java.util.Date;
-
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.PropertyContainer;
 import org.neo4j.graphdb.Transaction;
+
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Implements common methods to manage properties of nodes and relationships.
