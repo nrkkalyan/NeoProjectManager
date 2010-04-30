@@ -8,75 +8,71 @@
 	<name>NeoProjectManager</name>
 	<url>http://maven.apache.org</url>
 	<repositories>
-		<repository>
-			<id>neo4j-public-repository</id>
-			<url>http://m2.neo4j.org </url>
-		</repository>
+	  <repository>
+	    <id>neo4j-public-repository</id>
+	    <url>http://m2.neo4j.org</url>
+	  </repository>
+	  <repository>
+	    <id>Jboss Maven2 Repository</id>
+	    <url>http://repository.jboss.com/maven2</url>
+	  </repository>
 	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>org.neo4j</groupId>
 			<artifactId>neo4j-kernel</artifactId>
-			<version>1.0-rc</version>
+			<version>1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.ezmorph</groupId>
 			<artifactId>ezmorph</artifactId>
 			<version>1.0.6</version>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>net.sf.json</groupId>
+			<groupId>net.sf.json-lib</groupId>
 			<artifactId>json-lib</artifactId>
-			<version>2.3</version>
-			<scope>compile</scope>
+			<version>2.2.3</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons.collections</groupId>
+		  <groupId>org.apache.commons</groupId>
+		  <artifactId>commons-io</artifactId>
+		  <version>1.3.2</version>
+		</dependency>
+		<dependency>
+			<groupId>apache-collections</groupId>
 			<artifactId>commons-collections</artifactId>
-			<version>3.2.1</version>
-			<scope>compile</scope>
+			<version>3.1</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons.beanutils</groupId>
+			<groupId>apache-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
-			<version>1.8.2</version>
-			<scope>compile</scope>
+			<version>1.7.0</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons.lang</groupId>
+			<groupId>apache-lang</groupId>
 			<artifactId>commons-lang</artifactId>
-			<version>2.4</version>
-			<scope>compile</scope>
+			<version>2.1</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons.logging</groupId>
+			<groupId>apache-logging</groupId>
 			<artifactId>commons-logging</artifactId>
-			<version>1.1.1</version>
-			<scope>compile</scope>
+			<version>1.1.0.jboss</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons.io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>1.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons.validator</groupId>
+			<groupId>apache-validator</groupId>
 			<artifactId>commons-validator</artifactId>
-			<version>1.3.1</version>
-			<scope>compile</scope>
+			<version>1.1.3</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.7</version>
+			<version>4.8.1</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>6.0.24</version>
-			<type>jar</type>
-			<scope>provided</scope>
+		  <groupId>javax.servlet</groupId>
+		  <artifactId>servlet-api</artifactId>
+		  <version>2.4</version>
 		</dependency>
 	</dependencies>
 	<build>

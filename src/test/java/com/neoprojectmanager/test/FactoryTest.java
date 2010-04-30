@@ -1,26 +1,17 @@
 package com.neoprojectmanager.test;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import com.neoprojectmanager.model.Factory;
+import com.neoprojectmanager.model.Project;
+import com.neoprojectmanager.model.Resource;
+import org.apache.commons.io.FileUtils;
+import org.junit.*;
+import org.neo4j.graphdb.Transaction;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.neo4j.graphdb.Transaction;
-
-import com.neoprojectmanager.model.Factory;
-import com.neoprojectmanager.model.Project;
-import com.neoprojectmanager.model.Resource;
+import static org.junit.Assert.*;
 
 public class FactoryTest {
 
@@ -30,8 +21,8 @@ public class FactoryTest {
 	@BeforeClass
 	public static void oneTimeSetUp() throws IOException {
 		tempdir = File.createTempFile("NEO4J_TEMP_", "_TEST");
-		tempdir.delete(); // it's created as a file
-		tempdir.mkdir(); // I recreate it as a dir.
+		assertTrue(tempdir.delete()); // it's created as a file
+		assertTrue(tempdir.mkdir()); // I recreate it as a dir.
 		FileUtils.forceDeleteOnExit(tempdir);
 		factory = new Factory(tempdir.getCanonicalPath());
 		System.out.println("CREATED " + tempdir.getCanonicalPath());
@@ -77,14 +68,14 @@ public class FactoryTest {
 		try {
 			Project p = factory.getProjectById(0L);
 			assertNull(p); // This should be the "root" node
-			p = factory.getProjectById(-1L);
+			factory.getProjectById(-1L);
 			assertTrue(false); // Should have thrown an exception
-		} catch (IllegalArgumentException e) {
+		} catch (Exception e) {
 			assertTrue(true);
 		}
 
 		try {
-			Project p = factory.getProjectById(1000L);
+			factory.getProjectById(1000L);
 			assertTrue(false); // Should have thrown an exception
 		} catch (org.neo4j.graphdb.NotFoundException e) {
 			assertTrue(true);
@@ -93,14 +84,14 @@ public class FactoryTest {
 		try {
 			Resource r = factory.getResourceById(0L);
 			assertNull(r); // This should be the "root" node
-			r = factory.getResourceById(-1L);
+			factory.getResourceById(-1L);
 			assertTrue(false); // Should have thrown an exception
-		} catch (IllegalArgumentException e) {
+		} catch (Exception e) {
 			assertTrue(true);
 		}
 
 		try {
-			Resource r = factory.getResourceById(1000L);
+			factory.getResourceById(1000L);
 			assertTrue(false); // Should have thrown an exception
 		} catch (org.neo4j.graphdb.NotFoundException e) {
 			assertTrue(true);
