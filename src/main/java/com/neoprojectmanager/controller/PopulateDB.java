@@ -9,6 +9,7 @@ package com.neoprojectmanager.controller;
 
 import com.neoprojectmanager.model.Factory;
 import com.neoprojectmanager.model.Project;
+import org.neo4j.graphdb.Transaction;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -24,19 +25,24 @@ import static com.neoprojectmanager.utils.Formatting.domainToJSON;
 public class PopulateDB extends HttpServlet {
 
 	enum ACTION {
-		POPULATE, CLEAR, RESET, JSON
+		POPULATE, CLEAR, RESET, JSON, NONE
 	}
 
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		PrintWriter out = response.getWriter();
-		ACTION action = ACTION.valueOf(request.getParameter("action"));
+		ACTION action;
+        try {
+            action = ACTION.valueOf(request.getParameter("action"));
+        } catch (Exception e) {
+            action = ACTION.NONE;
+        }
 		response.setContentType("text/plain");
 		Factory tf = (Factory) getServletContext().getAttribute(
 				RESOURCE.NEO4J_INSTANCE.name());
-		
-		out.append("NEO4J INSTANCE ON " + tf.getDbFolder() + "\n");
+
+        out.append("NEO4J INSTANCE ON ").append(tf.getDbFolder()).append("\n");
 
 		switch (action) {
 		case POPULATE:
@@ -58,15 +64,20 @@ public class PopulateDB extends HttpServlet {
 			printJSON(out, tf);
 			return;
 		default:
-			out.append("ACTION '" + action + "' UNKNOWN\n");
-			out.append("SUPPORTED ACTIONS:\n" + ACTION.values());
+            out.append("ACTION '").append(String.valueOf(action)).append("' UNKNOWN\n");
+            out.append("SUPPORTED ACTIONS:\n");
+            for (ACTION s: ACTION.values())
+                out.append(String.format("   %s\n", s.name()));
 			return;
 		}
 	}
 
-	private PrintWriter printJSON(PrintWriter out, Factory tf) {
+	private void printJSON(PrintWriter out, Factory tf) {
+        Transaction t = tf.beginTx();
 		Iterator<Project> it = tf.getAllProjects();
-		return out.append(domainToJSON(it).toString(3));
+		out.append(domainToJSON(it).toString(3));
+        t.success();
+        t.finish();
 	}
 
 	public void init() throws ServletException {

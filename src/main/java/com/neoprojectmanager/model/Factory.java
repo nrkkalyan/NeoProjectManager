@@ -183,6 +183,7 @@ public class Factory {
 			task1.setDuration(inDays(10));
 			task2.setDuration(inDays(6));
 			task2.addDependentOn(task1);
+            createProject("Project 2").createTask("Task 2.1").setDuration(inDays(15));
 			tx.success();
 		} finally {
 			tx.finish();
